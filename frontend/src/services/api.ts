@@ -284,32 +284,6 @@ export const getBasins = async (): Promise<ApiResponse<any[]>> => {
   }
 };
 
-// Get stations for specific area or all stations
-export const getStations = async (params?: {
-  area_id?: string;
-  station_name?: string;
-  province?: string;
-  watershed?: string;
-  page?: number;
-  limit?: number;
-}): Promise<ApiResponse<StationInfo[]>> => {
-  try {
-    if (params?.area_id) {
-      const response = await apiClient.get(`/api/stations?area_id=${params.area_id}`);
-      return response.data;
-    } else {
-      const response = await apiClient.get('/api/pollution/stations', { params });
-      return response.data;
-    }
-  } catch (error: any) {
-    console.error('Get stations error:', error);
-    return {
-      success: false,
-      error: error.response?.data?.error || error.message || '获取监测站列表失败'
-    };
-  }
-};
-
 export const downloadReport = async (reportId: string): Promise<Blob> => {
   try {
     const response = await apiClient.get(`/api/reports/download/${reportId}`, {
