@@ -1,0 +1,55 @@
+[tool.poetry]
+name = "pollution-intelligence-ml"
+version = "0.1.0"
+description = "Machine Learning pipeline for industrial pollution analysis"
+authors = ["Your Name <your.email@example.com>"]
+packages = [{include = "pollution_ml"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+# Data processing
+pandas = "^2.1.0"
+numpy = "^1.24.0"
+polars = "^0.20.0"
+scipy = "^1.11.0"
+
+# Machine Learning
+scikit-learn = "^1.3.0"
+tensorflow = "^2.14.0"
+torch = "^2.1.0"
+prophet = "^1.1.4"
+statsmodels = "^0.14.0"
+
+# Time series
+sktime = "^0.21.0"
+tslearn = "^0.6.2"
+
+# Network analysis
+networkx = "^3.2"
+igraph = "^0.11.0"
+
+# Visualization
+matplotlib = "^3.7.0"
+seaborn = "^0.12.0"
+plotly = "^5.17.0"
+
+# Database
+psycopg2-binary = "^2.9.0"
+sqlalchemy = "^2.0.0"
+alembic = "^1.12.0"
+
+# HTTP requests
+requests = "^2.31.0"
+aiohttp = "^3.9.0"
+
+# Configuration
+pydantic = "^2.5.0"
+python-dotenv = "^1.0.0"
+
+# Progress bars
+tqdm = "^4.66.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+

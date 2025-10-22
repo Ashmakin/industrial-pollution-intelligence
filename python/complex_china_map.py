@@ -1,0 +1,599 @@
+#!/usr/bin/env python3
+"""
+复杂中国地图轮廓图生成器
+使用复杂边界数据生成真实的中国省份轮廓图
+"""
+
+import json
+import pandas as pd
+import numpy as np
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import logging
+from datetime import datetime, timedelta
+from typing import Dict, List, Tuple, Optional
+import os
+
+# 设置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class ComplexChinaMapVisualizer:
+    def __init__(self, db_url: str):
+        self.db_url = db_url
+        # 复杂边界数据
+        self.china_boundaries = self._get_complex_china_boundaries()
+    
+    def _get_complex_china_boundaries(self) -> Dict:
+        """获取复杂边界数据"""
+        return {
+            "type": "FeatureCollection",
+            "features": [
+                # 北京 - 复杂边界
+                {
+                    "type": "Feature",
+                    "properties": {"name": "北京", "code": "110000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [115.7, 40.2], [116.0, 40.3], [116.5, 40.2], [117.0, 40.1], [117.4, 40.2], 
+                            [117.4, 39.8], [117.2, 39.6], [117.0, 39.5], [116.5, 39.4], [116.0, 39.5], 
+                            [115.7, 39.6], [115.7, 40.2]
+                        ]]
+                    }
+                },
+                # 天津
+                {
+                    "type": "Feature", 
+                    "properties": {"name": "天津", "code": "120000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [117.0, 39.6], [117.5, 39.7], [118.0, 39.6], [118.0, 39.2], [117.8, 38.8], 
+                            [117.5, 38.6], [117.2, 38.7], [117.0, 38.8], [117.0, 39.6]
+                        ]]
+                    }
+                },
+                # 河北 - 复杂边界
+                {
+                    "type": "Feature",
+                    "properties": {"name": "河北", "code": "130000"},
+                    "geometry": {
+                        "type": "Polygon", 
+                        "coordinates": [[
+                            [113.5, 42.6], [114.0, 42.8], [115.0, 42.7], [116.0, 42.6], [117.0, 42.5], 
+                            [118.0, 42.4], [119.0, 42.3], [119.8, 42.6], [119.8, 40.0], [119.5, 38.0], 
+                            [119.0, 36.5], [118.5, 36.2], [118.0, 36.1], [117.0, 36.0], [116.0, 36.1], 
+                            [115.0, 36.2], [114.0, 36.3], [113.5, 36.1], [113.5, 42.6]
+                        ]]
+                    }
+                },
+                # 山西
+                {
+                    "type": "Feature",
+                    "properties": {"name": "山西", "code": "140000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [110.2, 40.7], [111.0, 40.8], [112.0, 40.7], [113.0, 40.6], [114.0, 40.5], 
+                            [114.6, 40.7], [114.6, 38.0], [114.0, 36.0], [113.0, 35.0], [112.0, 34.8], 
+                            [111.0, 34.7], [110.2, 34.6], [110.2, 40.7]
+                        ]]
+                    }
+                },
+                # 内蒙古 - 复杂形状
+                {
+                    "type": "Feature",
+                    "properties": {"name": "内蒙古", "code": "150000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [97.2, 53.3], [100.0, 53.5], [105.0, 53.4], [110.0, 53.3], [115.0, 53.2], 
+                            [120.0, 53.1], [125.0, 53.0], [126.0, 53.3], [126.0, 50.0], [125.0, 45.0], 
+                            [120.0, 40.0], [115.0, 38.0], [110.0, 37.5], [105.0, 37.3], [100.0, 37.2], 
+                            [97.2, 37.2], [97.2, 53.3]
+                        ]]
+                    }
+                },
+                # 辽宁
+                {
+                    "type": "Feature",
+                    "properties": {"name": "辽宁", "code": "210000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [118.3, 43.3], [120.0, 43.5], [122.0, 43.4], [124.0, 43.3], [125.3, 43.3], 
+                            [125.3, 41.0], [124.0, 39.0], [122.0, 38.8], [120.0, 38.7], [118.3, 38.7], 
+                            [118.3, 43.3]
+                        ]]
+                    }
+                },
+                # 吉林
+                {
+                    "type": "Feature",
+                    "properties": {"name": "吉林", "code": "220000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [121.6, 46.3], [125.0, 46.5], [128.0, 46.4], [130.0, 46.3], [131.2, 46.3], 
+                            [131.2, 44.0], [130.0, 42.0], [128.0, 41.0], [125.0, 40.9], [121.6, 40.9], 
+                            [121.6, 46.3]
+                        ]]
+                    }
+                },
+                # 黑龙江
+                {
+                    "type": "Feature",
+                    "properties": {"name": "黑龙江", "code": "230000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [121.1, 53.6], [125.0, 53.8], [130.0, 53.7], [133.0, 53.6], [135.1, 53.6], 
+                            [135.1, 50.0], [133.0, 46.0], [130.0, 44.0], [125.0, 43.5], [121.1, 43.4], 
+                            [121.1, 53.6]
+                        ]]
+                    }
+                },
+                # 上海
+                {
+                    "type": "Feature",
+                    "properties": {"name": "上海", "code": "310000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [120.9, 31.9], [121.2, 32.0], [121.5, 31.9], [121.8, 31.8], [122.1, 31.9], 
+                            [122.1, 31.5], [121.8, 31.2], [121.5, 31.0], [121.2, 30.8], [120.9, 30.7], 
+                            [120.9, 31.9]
+                        ]]
+                    }
+                },
+                # 江苏
+                {
+                    "type": "Feature",
+                    "properties": {"name": "江苏", "code": "320000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [116.2, 35.1], [118.0, 35.3], [120.0, 35.2], [121.9, 35.1], [121.9, 33.0], 
+                            [120.0, 31.0], [118.0, 30.9], [116.2, 30.8], [116.2, 35.1]
+                        ]]
+                    }
+                },
+                # 浙江
+                {
+                    "type": "Feature",
+                    "properties": {"name": "浙江", "code": "330000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [118.0, 31.4], [120.0, 31.6], [122.0, 31.5], [123.2, 31.4], [123.2, 29.0], 
+                            [122.0, 28.0], [120.0, 27.5], [118.0, 27.0], [118.0, 31.4]
+                        ]]
+                    }
+                },
+                # 安徽
+                {
+                    "type": "Feature",
+                    "properties": {"name": "安徽", "code": "340000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [114.9, 34.7], [116.0, 34.8], [117.0, 34.7], [118.0, 34.6], [119.3, 34.7], 
+                            [119.3, 32.0], [118.0, 30.0], [117.0, 29.8], [116.0, 29.6], [114.9, 29.4], 
+                            [114.9, 34.7]
+                        ]]
+                    }
+                },
+                # 福建
+                {
+                    "type": "Feature",
+                    "properties": {"name": "福建", "code": "350000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [115.9, 28.3], [117.0, 28.5], [118.0, 28.4], [119.0, 28.3], [120.7, 28.3], 
+                            [120.7, 26.0], [119.0, 24.0], [118.0, 23.8], [117.0, 23.6], [115.9, 23.5], 
+                            [115.9, 28.3]
+                        ]]
+                    }
+                },
+                # 江西
+                {
+                    "type": "Feature",
+                    "properties": {"name": "江西", "code": "360000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [113.6, 30.0], [115.0, 30.2], [116.0, 30.1], [117.0, 30.0], [118.5, 30.0], 
+                            [118.5, 27.0], [117.0, 25.0], [116.0, 24.8], [115.0, 24.6], [113.6, 24.5], 
+                            [113.6, 30.0]
+                        ]]
+                    }
+                },
+                # 山东
+                {
+                    "type": "Feature",
+                    "properties": {"name": "山东", "code": "370000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [114.5, 38.4], [116.0, 38.6], [118.0, 38.5], [120.0, 38.4], [122.0, 38.3], 
+                            [122.7, 38.4], [122.7, 36.0], [122.0, 35.0], [120.0, 34.6], [118.0, 34.5], 
+                            [116.0, 34.4], [114.5, 34.4], [114.5, 38.4]
+                        ]]
+                    }
+                },
+                # 河南
+                {
+                    "type": "Feature",
+                    "properties": {"name": "河南", "code": "410000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [110.4, 36.4], [112.0, 36.6], [114.0, 36.5], [116.0, 36.4], [116.7, 36.4], 
+                            [116.7, 33.0], [116.0, 32.0], [114.0, 31.5], [112.0, 31.3], [110.4, 31.2], 
+                            [110.4, 36.4]
+                        ]]
+                    }
+                },
+                # 湖北
+                {
+                    "type": "Feature",
+                    "properties": {"name": "湖北", "code": "420000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [108.3, 33.3], [110.0, 33.5], [112.0, 33.4], [114.0, 33.3], [116.1, 33.3], 
+                            [116.1, 31.0], [114.0, 30.0], [112.0, 29.5], [110.0, 29.2], [108.3, 29.0], 
+                            [108.3, 33.3]
+                        ]]
+                    }
+                },
+                # 湖南
+                {
+                    "type": "Feature",
+                    "properties": {"name": "湖南", "code": "430000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [108.8, 30.1], [110.0, 30.3], [112.0, 30.2], [114.0, 30.1], [114.3, 30.1], 
+                            [114.3, 27.0], [114.0, 26.0], [112.0, 25.5], [110.0, 25.0], [108.8, 24.6], 
+                            [108.8, 30.1]
+                        ]]
+                    }
+                },
+                # 广东
+                {
+                    "type": "Feature",
+                    "properties": {"name": "广东", "code": "440000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [109.7, 25.3], [111.0, 25.5], [113.0, 25.4], [115.0, 25.3], [117.3, 25.3], 
+                            [117.3, 22.0], [115.0, 21.0], [113.0, 20.5], [111.0, 20.2], [109.7, 20.1], 
+                            [109.7, 25.3]
+                        ]]
+                    }
+                },
+                # 广西
+                {
+                    "type": "Feature",
+                    "properties": {"name": "广西", "code": "450000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [104.3, 26.4], [106.0, 26.6], [108.0, 26.5], [110.0, 26.4], [112.0, 26.4], 
+                            [112.0, 23.0], [110.0, 22.0], [108.0, 21.5], [106.0, 21.2], [104.3, 20.9], 
+                            [104.3, 26.4]
+                        ]]
+                    }
+                },
+                # 海南
+                {
+                    "type": "Feature",
+                    "properties": {"name": "海南", "code": "460000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [108.6, 20.0], [109.0, 20.2], [109.5, 20.1], [110.0, 20.0], [111.1, 20.0], 
+                            [111.1, 19.0], [110.0, 18.5], [109.5, 18.3], [109.0, 18.2], [108.6, 18.1], 
+                            [108.6, 20.0]
+                        ]]
+                    }
+                },
+                # 重庆
+                {
+                    "type": "Feature",
+                    "properties": {"name": "重庆", "code": "500000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [105.3, 32.2], [106.0, 32.4], [107.0, 32.3], [108.0, 32.2], [110.2, 32.2], 
+                            [110.2, 30.0], [108.0, 29.0], [107.0, 28.5], [106.0, 28.3], [105.3, 28.2], 
+                            [105.3, 32.2]
+                        ]]
+                    }
+                },
+                # 四川
+                {
+                    "type": "Feature",
+                    "properties": {"name": "四川", "code": "510000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [97.3, 34.3], [100.0, 34.5], [103.0, 34.4], [106.0, 34.3], [108.5, 34.3], 
+                            [108.5, 30.0], [106.0, 28.0], [103.0, 27.0], [100.0, 26.5], [97.3, 26.0], 
+                            [97.3, 34.3]
+                        ]]
+                    }
+                },
+                # 贵州
+                {
+                    "type": "Feature",
+                    "properties": {"name": "贵州", "code": "520000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [103.6, 29.2], [105.0, 29.4], [107.0, 29.3], [109.6, 29.2], [109.6, 27.0], 
+                            [107.0, 26.0], [105.0, 25.0], [103.6, 24.6], [103.6, 29.2]
+                        ]]
+                    }
+                },
+                # 云南
+                {
+                    "type": "Feature",
+                    "properties": {"name": "云南", "code": "530000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [97.5, 29.2], [100.0, 29.4], [103.0, 29.3], [106.2, 29.2], [106.2, 25.0], 
+                            [103.0, 23.0], [100.0, 22.0], [97.5, 21.1], [97.5, 29.2]
+                        ]]
+                    }
+                },
+                # 西藏
+                {
+                    "type": "Feature",
+                    "properties": {"name": "西藏", "code": "540000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [78.4, 36.5], [85.0, 36.7], [90.0, 36.6], [95.0, 36.5], [99.1, 36.5], 
+                            [99.1, 32.0], [95.0, 30.0], [90.0, 29.0], [85.0, 28.0], [78.4, 27.5], 
+                            [78.4, 36.5]
+                        ]]
+                    }
+                },
+                # 陕西
+                {
+                    "type": "Feature",
+                    "properties": {"name": "陕西", "code": "610000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [105.5, 39.6], [107.0, 39.8], [109.0, 39.7], [111.3, 39.6], [111.3, 35.0], 
+                            [109.0, 33.0], [107.0, 32.0], [105.5, 31.4], [105.5, 39.6]
+                        ]]
+                    }
+                },
+                # 甘肃
+                {
+                    "type": "Feature",
+                    "properties": {"name": "甘肃", "code": "620000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [92.1, 42.8], [95.0, 43.0], [100.0, 42.9], [105.0, 42.8], [109.0, 42.8], 
+                            [109.0, 36.0], [105.0, 34.0], [100.0, 33.0], [95.0, 32.5], [92.1, 32.1], 
+                            [92.1, 42.8]
+                        ]]
+                    }
+                },
+                # 青海
+                {
+                    "type": "Feature",
+                    "properties": {"name": "青海", "code": "630000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [89.4, 39.2], [92.0, 39.4], [95.0, 39.3], [98.0, 39.2], [103.0, 39.2], 
+                            [103.0, 35.0], [98.0, 33.0], [95.0, 32.0], [92.0, 31.8], [89.4, 31.6], 
+                            [89.4, 39.2]
+                        ]]
+                    }
+                },
+                # 宁夏
+                {
+                    "type": "Feature",
+                    "properties": {"name": "宁夏", "code": "640000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [104.2, 39.4], [105.0, 39.6], [106.0, 39.5], [107.6, 39.4], [107.6, 37.0], 
+                            [106.0, 36.0], [105.0, 35.5], [104.2, 35.2], [104.2, 39.4]
+                        ]]
+                    }
+                },
+                # 新疆
+                {
+                    "type": "Feature",
+                    "properties": {"name": "新疆", "code": "650000"},
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [[
+                            [73.4, 49.2], [80.0, 49.4], [85.0, 49.3], [90.0, 49.2], [95.0, 49.1], 
+                            [96.4, 49.2], [96.4, 40.0], [95.0, 38.0], [90.0, 36.0], [85.0, 35.0], 
+                            [80.0, 34.5], [73.4, 34.3], [73.4, 49.2]
+                        ]]
+                    }
+                }
+            ]
+        }
+    
+    def get_latest_data(self, parameter: str) -> Dict[str, float]:
+        """从数据库获取最新数据"""
+        try:
+            conn = psycopg2.connect(self.db_url)
+            cursor = conn.cursor(cursor_factory=RealDictCursor)
+            
+            # 获取每个省份的最新数据
+            query = f"""
+                SELECT province, AVG({parameter}) as avg_value
+                FROM water_quality_data 
+                WHERE {parameter} IS NOT NULL 
+                AND monitoring_time >= NOW() - INTERVAL '7 days'
+                GROUP BY province
+            """
+            
+            cursor.execute(query)
+            results = cursor.fetchall()
+            
+            data = {}
+            for row in results:
+                province = row['province']
+                value = float(row['avg_value']) if row['avg_value'] is not None else None
+                if value is not None:
+                    data[province] = value
+            
+            cursor.close()
+            conn.close()
+            
+            return data
+            
+        except Exception as e:
+            logger.error(f"Error getting latest data: {e}")
+            return {}
+    
+    def calculate_pollution_level(self, value: float, parameter: str) -> Tuple[str, str]:
+        """根据参数值计算污染等级和颜色"""
+        if parameter == 'ph':
+            if 6.5 <= value <= 8.5:
+                return 'excellent', '#2E8B57'  # 优秀 - 深绿色
+            elif 6.0 <= value <= 9.0:
+                return 'good', '#90EE90'       # 良好 - 浅绿色
+            elif 5.5 <= value <= 9.5:
+                return 'light', '#FFD700'      # 轻度污染 - 金色
+            else:
+                return 'moderate', '#FFA500'   # 中度污染 - 橙色
+        
+        elif parameter == 'dissolved_oxygen':
+            if value >= 7.5:
+                return 'excellent', '#2E8B57'
+            elif value >= 5.0:
+                return 'good', '#90EE90'
+            elif value >= 3.0:
+                return 'light', '#FFD700'
+            else:
+                return 'moderate', '#FFA500'
+        
+        elif parameter == 'ammonia_nitrogen':
+            if value <= 0.5:
+                return 'excellent', '#2E8B57'
+            elif value <= 1.0:
+                return 'good', '#90EE90'
+            elif value <= 2.0:
+                return 'light', '#FFD700'
+            elif value <= 5.0:
+                return 'moderate', '#FFA500'
+            else:
+                return 'heavy', '#FF4500'      # 重度污染 - 橙红色
+        
+        elif parameter == 'total_phosphorus':
+            if value <= 0.1:
+                return 'excellent', '#2E8B57'
+            elif value <= 0.2:
+                return 'good', '#90EE90'
+            elif value <= 0.3:
+                return 'light', '#FFD700'
+            else:
+                return 'moderate', '#FFA500'
+        
+        else:
+            return 'unknown', '#808080'        # 未知 - 灰色
+    
+    def create_choropleth_map_data(self, parameter: str) -> Dict:
+        """创建轮廓图数据"""
+        try:
+            # 获取最新数据
+            data = self.get_latest_data(parameter)
+            
+            # 更新GeoJSON数据
+            features = []
+            for feature in self.china_boundaries['features']:
+                province_name = feature['properties']['name']
+                province_code = feature['properties']['code']
+                
+                # 获取该省份的数据
+                value = data.get(province_name, None)
+                
+                if value is not None:
+                    pollution_level, color = self.calculate_pollution_level(value, parameter)
+                else:
+                    value = 0.0
+                    pollution_level = 'unknown'
+                    color = '#808080'
+                
+                # 创建新的feature
+                new_feature = {
+                    "type": "Feature",
+                    "properties": {
+                        "name": province_name,
+                        "code": province_code,
+                        "value": value,
+                        "pollution_level": pollution_level,
+                        "color": color
+                    },
+                    "geometry": feature['geometry']
+                }
+                features.append(new_feature)
+            
+            # 创建地图配置
+            map_config = {
+                "map_type": "choropleth",
+                "parameter": parameter,
+                "color_scheme": "sequential",
+                "projection": "geoMercator",
+                "scale": 1000,
+                "center": [104.1954, 35.8617],
+                "zoom": 4,
+                "width": 800,
+                "height": 600
+            }
+            
+            result = {
+                "map_type": "choropleth",
+                "geojson_data": {
+                    "type": "FeatureCollection",
+                    "features": features
+                },
+                "map_config": map_config,
+                "data_points": len([f for f in features if f['properties']['value'] > 0]),
+                "parameter": parameter,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error creating choropleth map data: {e}")
+            return {"error": str(e)}
+
+def main():
+    import sys
+    
+    db_url = os.getenv('DATABASE_URL', 'postgres://pollution_user:pollution_pass@localhost:5432/pollution_db')
+    
+    visualizer = ComplexChinaMapVisualizer(db_url)
+    
+    if len(sys.argv) < 2:
+        print("Usage: python complex_china_map.py <parameter>")
+        print("Parameters: ph, dissolved_oxygen, ammonia_nitrogen, total_phosphorus")
+        sys.exit(1)
+    
+    parameter = sys.argv[1]
+    
+    result = visualizer.create_choropleth_map_data(parameter)
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+
+if __name__ == "__main__":
+    main()

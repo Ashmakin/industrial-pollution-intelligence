@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据采集测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        button {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+        .loading {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+        }
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 数据采集功能测试</h1>
+        <p>这个页面用于测试前端数据采集功能是否能正常工作。</p>
+        
+        <div>
+            <button onclick="testHealthCheck()">测试后端连接</button>
+            <button onclick="testDataCollection()" id="collectBtn">开始数据采集</button>
+            <button onclick="testCollectionStatus()">检查采集状态</button>
+        </div>
+        
+        <div id="status" class="status">
+            <h3>状态信息</h3>
+            <p>点击上方按钮开始测试...</p>
+        </div>
+        
+        <div id="response">
+            <h3>API响应</h3>
+            <pre id="responseContent">暂无响应数据</pre>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8080';
+        
+        async function testHealthCheck() {
+            const statusDiv = document.getElementById('status');
+            const responseDiv = document.getElementById('responseContent');
+            
+            statusDiv.className = 'status loading';
+            statusDiv.innerHTML = '<h3>测试后端连接</h3><p>正在检查后端API连接...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '<h3>✅ 后端连接正常</h3><p>API响应成功</p>';
+                
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<h3>❌ 后端连接失败</h3><p>' + error.message + '</p>';
+                
+                responseDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        async function testDataCollection() {
+            const statusDiv = document.getElementById('status');
+            const responseDiv = document.getElementById('responseContent');
+            const collectBtn = document.getElementById('collectBtn');
+            
+            collectBtn.disabled = true;
+            collectBtn.textContent = '采集中...';
+            
+            statusDiv.className = 'status loading';
+            statusDiv.innerHTML = '<h3>开始数据采集</h3><p>正在从CNEMC API采集数据...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/data/collect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        area_ids: [110000, 310000],
+                        max_records: 5
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.className = 'status success';
+                    statusDiv.innerHTML = '<h3>✅ 数据采集成功</h3><p>成功采集了数据</p>';
+                } else {
+                    statusDiv.className = 'status error';
+                    statusDiv.innerHTML = '<h3>❌ 数据采集失败</h3><p>' + (data.error || '未知错误') + '</p>';
+                }
+                
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<h3>❌ 数据采集失败</h3><p>' + error.message + '</p>';
+                
+                responseDiv.textContent = 'Error: ' + error.message;
+            } finally {
+                collectBtn.disabled = false;
+                collectBtn.textContent = '开始数据采集';
+            }
+        }
+        
+        async function testCollectionStatus() {
+            const statusDiv = document.getElementById('status');
+            const responseDiv = document.getElementById('responseContent');
+            
+            statusDiv.className = 'status loading';
+            statusDiv.innerHTML = '<h3>检查采集状态</h3><p>正在获取采集状态...</p>';
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/data/status`);
+                const data = await response.json();
+                
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '<h3>✅ 状态获取成功</h3><p>成功获取采集状态</p>';
+                
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<h3>❌ 状态获取失败</h3><p>' + error.message + '</p>';
+                
+                responseDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        // 页面加载时自动测试后端连接
+        window.onload = function() {
+            testHealthCheck();
+        };
+    </script>
+</body>
+</html>
+
