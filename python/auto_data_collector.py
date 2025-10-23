@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 自动数据采集系统
 - 每4小时自动采集全部地区数据
@@ -25,7 +25,7 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
-# 配置日志
+      
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -45,7 +45,7 @@ class DataPoint:
     value: float
     unit: str
     timestamp: datetime
-    data_hash: str  # 用于查重
+    data_hash: str        
 
 class AutoDataCollector:
     """自动数据采集器"""
@@ -57,7 +57,7 @@ class AutoDataCollector:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         })
         
-        # 全国主要流域监测断面
+                    
         self.monitoring_areas = {
             '110000': {'name': '北京', 'river': '永定河', 'basin': '海河流域'},
             '120000': {'name': '天津', 'river': '海河', 'basin': '海河流域'},
@@ -92,7 +92,7 @@ class AutoDataCollector:
             '650000': {'name': '新疆', 'river': '塔里木河', 'basin': '内陆河流域'}
         }
         
-        # 参数映射
+              
         self.parameter_mapping = {
             'pH': 'ph',
             '溶解氧': 'dissolved_oxygen',
@@ -147,15 +147,15 @@ class AutoDataCollector:
         """计算水质等级 (1-5级)"""
         if parameter == 'ph':
             if 6.5 <= value <= 8.5:
-                return 1  # 优秀
+                return 1      
             elif 6.0 <= value <= 9.0:
-                return 2  # 良好
+                return 2      
             elif 5.5 <= value <= 9.5:
-                return 3  # 轻度污染
+                return 3        
             elif 5.0 <= value <= 10.0:
-                return 4  # 中度污染
+                return 4        
             else:
-                return 5  # 重度污染
+                return 5        
         elif parameter == 'dissolved_oxygen':
             if value >= 7.5:
                 return 1
@@ -190,12 +190,12 @@ class AutoDataCollector:
             else:
                 return 5
         else:
-            return 3  # 默认中等
+            return 3        
     
     def calculate_pollution_index(self, parameter: str, value: float) -> float:
         """计算污染指数"""
         grade = self.calculate_water_quality_grade(parameter, value)
-        return float(grade * 20)  # 转换为0-100的指数
+        return float(grade * 20)               
     
     def fetch_cnemc_data(self, area_id: str) -> List[Dict]:
         """获取CNEMC数据"""
@@ -225,26 +225,26 @@ class AutoDataCollector:
         for item in data:
             try:
                 station_name = item.get('StationName', 'Unknown Station')
-                # 添加流域和河流信息到站点名称
+                                
                 full_station_name = f"{station_name}({area_info['river']}-{area_info['basin']})"
                 
-                # 解析测量值
+                       
                 measurements = item.get('Measurements', [])
                 for measurement in measurements:
                     param_name = measurement.get('ParamName')
                     if param_name in self.parameter_mapping:
-                        # 解析数值
+                              
                         value_text = measurement.get('Value', '')
                         try:
-                            # 提取数值部分
+                                    
                             if '>' in value_text:
-                                value = float(value_text.replace('>', '')) * 1.1  # 处理检测限
+                                value = float(value_text.replace('>', '')) * 1.1         
                             elif '<' in value_text:
-                                value = float(value_text.replace('<', '')) * 0.9  # 处理检测限
+                                value = float(value_text.replace('<', '')) * 0.9         
                             else:
                                 value = float(value_text)
                             
-                            # 生成数据点
+                                   
                             data_point = DataPoint(
                                 station_name=full_station_name,
                                 area_id=item.get('AreaID', ''),
@@ -252,10 +252,10 @@ class AutoDataCollector:
                                 value=value,
                                 unit=measurement.get('Unit', ''),
                                 timestamp=current_time,
-                                data_hash=''  # 稍后生成
+                                data_hash=''        
                             )
                             
-                            # 生成哈希值
+                                   
                             data_point.data_hash = self.generate_data_hash(
                                 data_point.station_name,
                                 data_point.parameter,
@@ -281,7 +281,7 @@ class AutoDataCollector:
             conn = psycopg2.connect(self.db_url)
             cursor = conn.cursor()
             
-            # 获取已存在的数据 - 基于站点名称、参数和时间
+                                     
             cursor.execute("""
                 SELECT DISTINCT station_name, monitoring_time 
                 FROM water_quality_data 
@@ -290,12 +290,12 @@ class AutoDataCollector:
             
             existing_records = {(row[0], row[1]) for row in cursor.fetchall()}
             
-            # 过滤重复数据
+                    
             new_data_points = []
             duplicate_count = 0
             
             for point in data_points:
-                # 检查是否存在相同的站点和时间记录
+                                  
                 record_key = (point.station_name, point.timestamp)
                 if record_key not in existing_records:
                     new_data_points.append(point)
@@ -311,7 +311,7 @@ class AutoDataCollector:
             
         except Exception as e:
             logger.error(f"Error checking duplicates: {e}")
-            return data_points  # 如果出错，返回原始数据
+            return data_points               
     
     def store_data_to_db(self, data_points: List[DataPoint]) -> int:
         """存储数据到数据库"""
@@ -322,25 +322,25 @@ class AutoDataCollector:
             conn = psycopg2.connect(self.db_url)
             cursor = conn.cursor()
             
-            # 准备插入语句 - 匹配实际数据库表结构
+                                 
             insert_query = """
                 INSERT INTO water_quality_data 
                 (station_name, station_code, ph, temperature, dissolved_oxygen, ammonia_nitrogen, total_phosphorus, conductivity, turbidity, monitoring_time, province, watershed, water_quality_grade, pollution_index)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
-            # 批量插入数据
+                    
             data_tuples = []
             for point in data_points:
-                # 提取省份和流域信息
+                           
                 province = self.extract_province_from_station(point.station_name)
                 watershed = self.extract_watershed_from_station(point.station_name)
                 
-                # 计算水质等级和污染指数
+                             
                 wq_grade = self.calculate_water_quality_grade(point.parameter, point.value)
                 pollution_index = self.calculate_pollution_index(point.parameter, point.value)
                 
-                # 根据参数类型设置相应的值
+                              
                 ph = point.value if point.parameter == 'ph' else None
                 temperature = point.value if point.parameter == 'temperature' else None
                 dissolved_oxygen = point.value if point.parameter == 'dissolved_oxygen' else None
@@ -351,7 +351,7 @@ class AutoDataCollector:
                 
                 data_tuples.append((
                     point.station_name,
-                    point.area_id,  # 作为station_code
+                    point.area_id,                  
                     ph,
                     temperature,
                     dissolved_oxygen,
@@ -385,22 +385,22 @@ class AutoDataCollector:
         """采集单个区域数据"""
         logger.info(f"Collecting data for {area_info['name']} ({area_id})")
         
-        # 获取数据
+              
         raw_data = self.fetch_cnemc_data(area_id)
         if not raw_data:
             logger.warning(f"No data received for {area_info['name']}")
             return 0
         
-        # 解析数据
+              
         data_points = self.parse_cnemc_response(raw_data, area_info)
         if not data_points:
             logger.warning(f"No valid data points for {area_info['name']}")
             return 0
         
-        # 查重
+            
         new_data_points = self.check_duplicates(data_points)
         
-        # 存储数据
+              
         inserted_count = self.store_data_to_db(new_data_points)
         
         return inserted_count
@@ -413,7 +413,7 @@ class AutoDataCollector:
         results = {}
         total_inserted = 0
         
-        # 使用线程池并行采集
+                   
         with ThreadPoolExecutor(max_workers=5) as executor:
             futures = {}
             
@@ -421,11 +421,11 @@ class AutoDataCollector:
                 future = executor.submit(self.collect_area_data, area_id, area_info)
                 futures[future] = (area_id, area_info['name'])
             
-            # 收集结果
+                  
             for future in futures:
                 area_id, area_name = futures[future]
                 try:
-                    count = future.result(timeout=60)  # 60秒超时
+                    count = future.result(timeout=60)         
                     results[area_name] = count
                     total_inserted += count
                     logger.info(f"{area_name}: {count} records inserted")
@@ -447,7 +447,7 @@ class AutoDataCollector:
         try:
             results = self.collect_all_data()
             
-            # 记录采集结果
+                    
             summary = {
                 'timestamp': datetime.now().isoformat(),
                 'total_areas': len(results),
@@ -465,16 +465,16 @@ class AutoDataCollector:
         """启动定时调度器"""
         logger.info("Starting auto data collector scheduler...")
         
-        # 每4小时执行一次
+                  
         schedule.every(4).hours.do(self.run_scheduled_collection)
         
-        # 立即执行一次
+                
         self.run_scheduled_collection()
         
-        # 主循环
+             
         while True:
             schedule.run_pending()
-            time.sleep(60)  # 每分钟检查一次
+            time.sleep(60)           
 
 def main():
     """主函数"""
@@ -483,12 +483,12 @@ def main():
     collector = AutoDataCollector(db_url)
     
     if len(sys.argv) > 1 and sys.argv[1] == '--once':
-        # 单次采集模式
+                
         logger.info("Running one-time data collection...")
         results = collector.collect_all_data()
         print(json.dumps(results, ensure_ascii=False, indent=2))
     else:
-        # 定时采集模式
+                
         collector.start_scheduler()
 
 if __name__ == "__main__":

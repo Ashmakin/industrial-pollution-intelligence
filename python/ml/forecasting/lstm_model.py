@@ -36,14 +36,14 @@ class WaterQualityLSTM:
     def prepare_sequences(self, df: pd.DataFrame, target_columns: List[str]) -> Tuple[np.ndarray, np.ndarray]:
         """Prepare sequences for LSTM training"""
         
-        # Select features (exclude target columns and non-numeric)
+                                                                  
         exclude_cols = target_columns + ['monitoring_time', 'station_name', 'province', 'watershed', 'area_id', 'water_quality_grade']
         feature_columns = [col for col in df.columns if col not in exclude_cols and df[col].dtype in ['float64', 'int64']]
         
-        # Scale features
+                        
         scaled_features = self.scaler.fit_transform(df[feature_columns])
         
-        # Create sequences
+                          
         X, y = [], []
         
         for station in df['station_name'].unique():
@@ -96,7 +96,7 @@ class WaterQualityLSTM:
         
         logger.info(f"Training LSTM model for targets: {target_columns}")
         
-        # Prepare data
+                      
         X, y = self.prepare_sequences(df, target_columns)
         
         if len(X) == 0:
@@ -105,21 +105,21 @@ class WaterQualityLSTM:
         self.feature_columns = [col for col in df.columns if col not in target_columns + ['monitoring_time', 'station_name', 'province', 'watershed', 'area_id', 'water_quality_grade'] and df[col].dtype in ['float64', 'int64']]
         self.target_columns = target_columns
         
-        # Build model
+                     
         input_shape = (X.shape[1], X.shape[2])
-        output_shape = y.shape[1] * y.shape[2]  # prediction_horizon * n_targets
+        output_shape = y.shape[1] * y.shape[2]                                  
         self.model = self.build_model(input_shape, output_shape)
         
-        # Reshape y for training
+                                
         y_reshaped = y.reshape(y.shape[0], -1)
         
-        # Callbacks
+                   
         callbacks = [
             EarlyStopping(patience=20, restore_best_weights=True),
             ReduceLROnPlateau(factor=0.5, patience=10, min_lr=1e-7)
         ]
         
-        # Train model
+                     
         history = self.model.fit(
             X, y_reshaped,
             epochs=epochs,
@@ -149,11 +149,11 @@ class WaterQualityLSTM:
             if len(station_data) < self.sequence_length:
                 continue
             
-            # Get last sequence
+                               
             station_features = self.scaler.transform(station_data[self.feature_columns].iloc[-self.sequence_length:])
             X = station_features.reshape(1, self.sequence_length, -1)
             
-            # Predict
+                     
             pred = self.model.predict(X, verbose=0)
             pred = pred.reshape(steps_ahead, len(self.target_columns))
             
@@ -164,19 +164,19 @@ class WaterQualityLSTM:
     def evaluate(self, df: pd.DataFrame, test_split: float = 0.2) -> Dict[str, float]:
         """Evaluate model performance"""
         
-        # Split data temporally
+                               
         df_sorted = df.sort_values('monitoring_time')
         split_idx = int(len(df_sorted) * (1 - test_split))
         train_df = df_sorted.iloc[:split_idx]
         test_df = df_sorted.iloc[split_idx:]
         
-        # Train on train data
+                             
         self.train(train_df, self.target_columns, validation_split=0.2, epochs=50)
         
-        # Predict on test data
+                              
         predictions = self.predict(test_df)
         
-        # Calculate metrics
+                           
         metrics = {}
         for target in self.target_columns:
             actual_values = []
@@ -208,10 +208,10 @@ class WaterQualityLSTM:
         
         Path(model_path).mkdir(parents=True, exist_ok=True)
         
-        # Save model
+                    
         self.model.save(f"{model_path}/lstm_model.h5")
         
-        # Save scaler and metadata
+                                  
         joblib.dump(self.scaler, f"{model_path}/scaler.pkl")
         joblib.dump({
             'feature_columns': self.feature_columns,
@@ -224,10 +224,10 @@ class WaterQualityLSTM:
     
     def load_model(self, model_path: str):
         """Load trained model and scaler"""
-        # Load model
+                    
         self.model = tf.keras.models.load_model(f"{model_path}/lstm_model.h5")
         
-        # Load scaler and metadata
+                                  
         self.scaler = joblib.load(f"{model_path}/scaler.pkl")
         metadata = joblib.load(f"{model_path}/model_metadata.pkl")
         
@@ -293,17 +293,17 @@ class MultiTargetLSTM:
 
 def main():
     """Example usage"""
-    # Load processed data
+                         
     df = pd.read_parquet("data/processed_water_quality.parquet")
     
-    # Define target variables
+                             
     targets = ['ph', 'dissolved_oxygen', 'ammonia_nitrogen', 'total_phosphorus']
     
-    # Train multi-target LSTM
+                             
     multi_lstm = MultiTargetLSTM(sequence_length=24, prediction_horizon=6)
     multi_lstm.train_multi_target(df, targets)
     
-    # Make predictions
+                      
     predictions = multi_lstm.predict_multi_target(df, targets)
     
     print("Multi-target LSTM training and prediction completed")

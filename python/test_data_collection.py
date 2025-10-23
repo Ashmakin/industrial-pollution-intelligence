@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 Simple data collection test script for the Industrial Pollution Intelligence System
 """
@@ -11,13 +11,13 @@ import psycopg2
 from datetime import datetime, timedelta
 import random
 
-# Add the project root to the Python path
+                                         
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 async def create_test_data():
     """Create test water quality data for demonstration"""
     
-    # Database connection
+                         
     conn = psycopg2.connect(
         host="localhost",
         port=5432,
@@ -28,7 +28,7 @@ async def create_test_data():
     
     cursor = conn.cursor()
     
-    # Create sample stations if they don't exist
+                                                
     stations = [
         ("Beijing Station", "BJ001", "Beijing", "Haihe River", 39.9042, 116.4074),
         ("Shanghai Station", "SH001", "Shanghai", "Yangtze River", 31.2304, 121.4737),
@@ -47,10 +47,10 @@ async def create_test_data():
     
     conn.commit()
     
-    # Generate test water quality data
+                                      
     print("Generating test water quality data...")
     
-    # Base values for each parameter
+                                    
     base_values = {
         'temperature': 20.0,
         'ph': 7.5,
@@ -65,44 +65,44 @@ async def create_test_data():
         'algae_density': 100.0
     }
     
-    # Generate data for the last 30 days, 4-hour intervals
+                                                          
     start_date = datetime.now() - timedelta(days=30)
     data_points = []
     
     for station_name, _, _, _, _, _ in stations:
-        for i in range(180):  # 30 days * 6 measurements per day
+        for i in range(180):                                    
             timestamp = start_date + timedelta(hours=i*4)
             
-            # Add some seasonal variation and random noise
-            seasonal_factor = 1 + 0.2 * np.sin(2 * np.pi * i / (24 * 30))  # Monthly cycle
+                                                          
+            seasonal_factor = 1 + 0.2 * np.sin(2 * np.pi * i / (24 * 30))                 
             
             values = {}
             for param, base_val in base_values.items():
-                # Add seasonal variation, random noise, and some correlation between parameters
-                noise = random.gauss(0, base_val * 0.1)  # 10% noise
-                seasonal = base_val * (seasonal_factor - 1) * 0.3  # 30% seasonal variation
+                                                                                               
+                noise = random.gauss(0, base_val * 0.1)             
+                seasonal = base_val * (seasonal_factor - 1) * 0.3                          
                 
-                # Add some pollution events (higher ammonia nitrogen, lower dissolved oxygen)
-                if param == 'ammonia_nitrogen' and random.random() < 0.05:  # 5% chance of pollution event
+                                                                                             
+                if param == 'ammonia_nitrogen' and random.random() < 0.05:                                
                     values[param] = base_val * random.uniform(2, 5) + noise + seasonal
-                elif param == 'dissolved_oxygen' and random.random() < 0.05:  # 5% chance of pollution event
+                elif param == 'dissolved_oxygen' and random.random() < 0.05:                                
                     values[param] = max(0, base_val * random.uniform(0.3, 0.7) + noise + seasonal)
                 else:
                     values[param] = max(0, base_val + noise + seasonal)
             
-            # Calculate water quality grade (simplified)
+                                                        
             if values['ammonia_nitrogen'] > 2.0 or values['total_phosphorus'] > 0.4:
-                water_quality_grade = 5  # Poor
+                water_quality_grade = 5        
             elif values['ammonia_nitrogen'] > 1.0 or values['total_phosphorus'] > 0.2:
-                water_quality_grade = 4  # Below average
+                water_quality_grade = 4                 
             elif values['dissolved_oxygen'] < 5.0 or values['ph'] < 6.5 or values['ph'] > 8.5:
-                water_quality_grade = 3  # Average
+                water_quality_grade = 3           
             elif values['dissolved_oxygen'] > 6.0 and 6.5 <= values['ph'] <= 8.5:
-                water_quality_grade = 2  # Good
+                water_quality_grade = 2        
             else:
-                water_quality_grade = 1  # Excellent
+                water_quality_grade = 1             
             
-            # Calculate pollution index (simplified)
+                                                    
             pollution_index = (
                 values['ammonia_nitrogen'] * 10 +
                 values['total_phosphorus'] * 20 +
@@ -133,7 +133,7 @@ async def create_test_data():
                 'data_source': 'TEST_DATA'
             })
     
-    # Insert data in batches
+                            
     print(f"Inserting {len(data_points)} data points...")
     
     batch_size = 100
@@ -158,7 +158,7 @@ async def create_test_data():
         conn.commit()
         print(f"Inserted batch {i//batch_size + 1}/{(len(data_points) + batch_size - 1)//batch_size}")
     
-    # Verify data insertion
+                           
     cursor.execute("SELECT COUNT(*) FROM water_quality_data")
     count = cursor.fetchone()[0]
     print(f"Total data points in database: {count}")

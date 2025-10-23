@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 增强的CNEMC数据收集器
 支持完整的省市、流域、监测站选择
@@ -18,7 +18,7 @@ import os
 import hashlib
 from dataclasses import dataclass
 
-# 配置日志
+      
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ class EnhancedCNEMCCollector:
         self.db_url = db_url
         self.base_url = "https://szzdjc.cnemc.cn:8070/GJZ/Ajax/Publish.ashx"
         
-        # 完整的中国各省市代码
+                    
         self.area_codes = {
             '北京': '110000',
             '天津': '120000', 
@@ -90,7 +90,7 @@ class EnhancedCNEMCCollector:
             '新疆': '650000'
         }
         
-        # 参数映射
+              
         self.parameter_mapping = {
             'pH': 'ph',
             '溶解氧': 'dissolved_oxygen',
@@ -105,7 +105,7 @@ class EnhancedCNEMCCollector:
             '藻密度': 'algae_density'
         }
         
-        # 流域映射
+              
         self.basin_mapping = {
             '海河流域': 'haihe',
             '黄河流域': 'yellow_river',
@@ -128,7 +128,7 @@ class EnhancedCNEMCCollector:
                 'RiverID': river_id,
                 'MNName': station_name,
                 'PageIndex': -1,
-                'PageSize': 100,  # 增加页面大小
+                'PageSize': 100,          
                 'action': 'getRealDatas'
             }
             
@@ -140,7 +140,7 @@ class EnhancedCNEMCCollector:
             data = response.json()
             logger.info(f"Successfully fetched data: {data.get('records', 0)} records")
             
-            # 检查响应格式
+                    
             if isinstance(data, dict) and 'result' in data:
                 return data
             else:
@@ -157,13 +157,13 @@ class EnhancedCNEMCCollector:
             if len(row) < len(headers):
                 return None
             
-            # 解析监测时间
-            time_str = row[3]  # 监测时间
+                    
+            time_str = row[3]        
             if time_str and time_str != "null" and time_str != "--":
                 try:
-                    # 处理格式如 "10-22 16:00"
+                                         
                     if "-" in time_str and ":" in time_str:
-                        # 添加当前年份
+                                
                         current_year = datetime.now().year
                         full_time_str = f"{current_year}-{time_str}"
                         monitoring_time = datetime.strptime(full_time_str, "%Y-%m-%d %H:%M")
@@ -175,12 +175,12 @@ class EnhancedCNEMCCollector:
             else:
                 monitoring_time = datetime.now()
             
-            # 解析数值数据
+                    
             def parse_value(value_str):
                 if not value_str or value_str == '*' or value_str.strip() == '':
                     return None
                 try:
-                    # 提取原始值
+                           
                     if 'title=' in value_str:
                         import re
                         match = re.search(r'原始值：([0-9.-]+)', value_str)
@@ -190,11 +190,11 @@ class EnhancedCNEMCCollector:
                 except:
                     return None
             
-            # 解析站点名称，去除HTML标签
+                             
             def clean_station_name(name_str):
                 import re
                 if '<span' in name_str:
-                    # 提取span标签内的文本
+                                  
                     match = re.search(r'>([^<]+)<', name_str)
                     if match:
                         return match.group(1).strip()
@@ -231,7 +231,7 @@ class EnhancedCNEMCCollector:
             conn = psycopg2.connect(self.db_url)
             cursor = conn.cursor()
             
-            # 查询已存在的数据哈希
+                        
             cursor.execute("""
                 SELECT data_hash FROM water_quality_data 
                 WHERE data_hash IS NOT NULL
@@ -262,13 +262,13 @@ class EnhancedCNEMCCollector:
             skipped_count = 0
             
             for record in records:
-                # 检查是否已存在
+                         
                 record_hash = record.to_hash()
                 if record_hash in existing_hashes:
                     skipped_count += 1
                     continue
                 
-                # 插入新数据
+                       
                 cursor.execute("""
                     INSERT INTO water_quality_data (
                         province, basin, station_name, monitoring_time, water_quality_class,
@@ -310,7 +310,7 @@ class EnhancedCNEMCCollector:
         
         logger.info(f"Starting data collection for {len(selected_areas)} areas")
         
-        # 获取已存在的数据哈希
+                    
         existing_hashes = self.get_existing_data_hashes()
         
         total_inserted = 0
@@ -326,7 +326,7 @@ class EnhancedCNEMCCollector:
             logger.info(f"Collecting data for {area_name} ({area_id})")
             
             try:
-                # 获取数据
+                      
                 data = self.fetch_cnemc_data(area_id)
                 
                 if data.get('result') != 1 or not data.get('tbody'):
@@ -334,7 +334,7 @@ class EnhancedCNEMCCollector:
                     collection_results[area_name] = {'inserted': 0, 'skipped': 0, 'error': 'No data'}
                     continue
                 
-                # 解析数据
+                      
                 headers = data.get('thead', [])
                 records = []
                 
@@ -343,7 +343,7 @@ class EnhancedCNEMCCollector:
                     if record:
                         records.append(record)
                 
-                # 批量插入数据
+                        
                 inserted, skipped = self.insert_data_batch(records, existing_hashes)
                 
                 total_inserted += inserted
@@ -357,7 +357,7 @@ class EnhancedCNEMCCollector:
                 
                 logger.info(f"{area_name}: inserted {inserted}, skipped {skipped}")
                 
-                # 避免请求过于频繁
+                          
                 time.sleep(1)
                 
             except Exception as e:

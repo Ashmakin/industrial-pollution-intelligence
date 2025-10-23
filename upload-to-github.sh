@@ -1,18 +1,18 @@
-#!/bin/bash
 
-# GitHub Upload Script for Industrial Pollution Intelligence System
-# Run this script after creating the GitHub repository
+
+
+
 
 echo "🚀 Industrial Pollution Intelligence System - GitHub Upload"
 echo "=========================================================="
 
-# Check if we're in a git repository
+
 if [ ! -d ".git" ]; then
     echo "❌ Error: Not in a git repository. Please run 'git init' first."
     exit 1
 fi
 
-# Check if remote origin is set
+
 if ! git remote get-url origin >/dev/null 2>&1; then
     echo "📝 Please set the GitHub repository URL first:"
     echo ""
@@ -23,7 +23,7 @@ if ! git remote get-url origin >/dev/null 2>&1; then
     read -p "Press Enter after setting the remote origin..."
 fi
 
-# Check if remote is set
+
 if ! git remote get-url origin >/dev/null 2>&1; then
     echo "❌ Error: No remote origin set. Please add the GitHub repository URL first."
     exit 1
@@ -32,10 +32,10 @@ fi
 echo "✅ Git repository ready"
 echo "📦 Pushing code to GitHub..."
 
-# Add all files
+
 git add .
 
-# Create commit
+
 git commit -m "feat: Complete Industrial Pollution Intelligence System
 
 - Rust + Axum backend with PostgreSQL integration
@@ -59,7 +59,7 @@ Features:
 ✅ Comprehensive analysis tools
 ✅ Professional reporting system"
 
-# Push to GitHub
+
 echo "🚀 Pushing to GitHub..."
 git push -u origin main
 

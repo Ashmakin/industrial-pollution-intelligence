@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 import json
 import os
 import sys
@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(name)s:%(message
 logger = logging.getLogger(__name__)
 
 PROVINCE_GEOJSON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '中国_省.geojson'))
-# CITY_GEOJSON_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '中国_市.geojson'))
+                                                                                                    
 
 
 def _get_db_connection(db_url: str):
@@ -63,7 +63,7 @@ def _fetch_latest_province_avgs(db_url: str, parameter: str) -> Dict[str, float]
     try:
         conn = _get_db_connection(db_url)
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        # 取各省最近一次监测时间的均值（或近7天平均）
+                                
         query = f"""
             WITH latest_times AS (
                 SELECT province, MAX(monitoring_time) AS latest_time
@@ -96,7 +96,7 @@ def create_map(parameter: str) -> Dict:
     features = []
     for feature in province_geo.get('features', []):
         props = feature.get('properties', {})
-        # 省级名称字段容错：常见键名
+                       
         name = props.get('name') or props.get('NAME') or props.get('Name') or props.get('省') or props.get('省份')
         code = props.get('adcode') or props.get('code') or props.get('adCode')
         val = province_avgs.get(name)

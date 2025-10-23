@@ -46,20 +46,20 @@ class WaterQualityProphet:
     def prepare_prophet_data(self, df: pd.DataFrame, target_column: str) -> pd.DataFrame:
         """Prepare data for Prophet (requires 'ds' and 'y' columns)"""
         
-        # Group by station and prepare time series
+                                                  
         prophet_data = []
         
         for station in df['station_name'].unique():
             station_data = df[df['station_name'] == station].copy()
             station_data = station_data.sort_values('monitoring_time')
             
-            # Remove missing values
+                                   
             station_data = station_data.dropna(subset=[target_column])
             
-            if len(station_data) < 50:  # Need sufficient data for Prophet
+            if len(station_data) < 50:                                    
                 continue
             
-            # Create Prophet format
+                                   
             prophet_df = pd.DataFrame({
                 'ds': station_data['monitoring_time'],
                 'y': station_data[target_column],
@@ -76,7 +76,7 @@ class WaterQualityProphet:
     def train_prophet_model(self, df: pd.DataFrame, target_column: str, station: str) -> Prophet:
         """Train Prophet model for a specific station and target"""
         
-        # Filter data for specific station
+                                          
         station_data = df[df['station_name'] == station].copy()
         station_data = station_data.sort_values('monitoring_time')
         station_data = station_data.dropna(subset=[target_column])
@@ -84,13 +84,13 @@ class WaterQualityProphet:
         if len(station_data) < 50:
             raise ValueError(f"Insufficient data for station {station}")
         
-        # Prepare Prophet data
+                              
         prophet_df = pd.DataFrame({
             'ds': station_data['monitoring_time'],
             'y': station_data[target_column]
         })
         
-        # Create and configure Prophet model
+                                            
         model = Prophet(
             yearly_seasonality=self.yearly_seasonality,
             weekly_seasonality=self.weekly_seasonality,
@@ -101,25 +101,25 @@ class WaterQualityProphet:
             interval_width=0.95
         )
         
-        # Add custom seasonalities for water quality patterns
-        # Add monthly seasonality for seasonal variations
+                                                             
+                                                         
         model.add_seasonality(name='monthly', period=30.5, fourier_order=5)
         
-        # Add quarterly seasonality for broader patterns
+                                                        
         model.add_seasonality(name='quarterly', period=91.25, fourier_order=3)
         
-        # Add regressors for other water quality parameters
+                                                           
         regressor_columns = ['temperature', 'ph', 'dissolved_oxygen', 'conductivity', 'turbidity']
         available_regressors = [col for col in regressor_columns if col in station_data.columns and col != target_column]
         
         for regressor in available_regressors:
-            if station_data[regressor].notna().sum() > len(station_data) * 0.8:  # At least 80% non-null
-                # Forward fill missing values
+            if station_data[regressor].notna().sum() > len(station_data) * 0.8:                         
+                                             
                 station_data[regressor] = station_data[regressor].fillna(method='ffill').fillna(method='bfill')
                 prophet_df[regressor] = station_data[regressor]
                 model.add_regressor(regressor)
         
-        # Train model
+                     
         model.fit(prophet_df)
         
         return model
@@ -153,23 +153,23 @@ class WaterQualityProphet:
             forecasts[target] = {}
             
             for station, model in self.models[target].items():
-                # Create future dataframe
+                                         
                 future = model.make_future_dataframe(periods=periods, freq=freq)
                 
-                # Add regressors if available
+                                             
                 station_data = df[df['station_name'] == station].sort_values('monitoring_time')
                 
-                # Get last known values for regressors
+                                                      
                 regressor_columns = ['temperature', 'ph', 'dissolved_oxygen', 'conductivity', 'turbidity']
                 available_regressors = [col for col in regressor_columns if col in station_data.columns and col != target]
                 
                 for regressor in available_regressors:
                     if regressor in future.columns:
-                        # Use last known value for future periods
+                                                                 
                         last_value = station_data[regressor].dropna().iloc[-1]
                         future[regressor].fillna(last_value, inplace=True)
                 
-                # Make forecast
+                               
                 forecast = model.predict(future)
                 forecasts[target][station] = forecast
         
@@ -184,11 +184,11 @@ class WaterQualityProphet:
         
         model = self.models[target_column][station]
         
-        # Split data temporally
+                               
         station_data = df[df['station_name'] == station].sort_values('monitoring_time')
         station_data = station_data.dropna(subset=[target_column])
         
-        if len(station_data) < test_days * 6:  # Need at least 6 measurements per day
+        if len(station_data) < test_days * 6:                                        
             return {}
         
         split_date = station_data['monitoring_time'].max() - timedelta(days=test_days)
@@ -198,13 +198,13 @@ class WaterQualityProphet:
         if len(train_data) < 50 or len(test_data) < 10:
             return {}
         
-        # Train model on training data
+                                      
         train_prophet_df = pd.DataFrame({
             'ds': train_data['monitoring_time'],
             'y': train_data[target_column]
         })
         
-        # Add regressors
+                        
         regressor_columns = ['temperature', 'ph', 'dissolved_oxygen', 'conductivity', 'turbidity']
         available_regressors = [col for col in regressor_columns if col in train_data.columns and col != target_column]
         
@@ -212,7 +212,7 @@ class WaterQualityProphet:
             if train_data[regressor].notna().sum() > len(train_data) * 0.8:
                 train_prophet_df[regressor] = train_data[regressor].fillna(method='ffill').fillna(method='bfill')
         
-        # Create new model for evaluation
+                                         
         eval_model = Prophet(
             yearly_seasonality=self.yearly_seasonality,
             weekly_seasonality=self.weekly_seasonality,
@@ -226,10 +226,10 @@ class WaterQualityProphet:
         
         eval_model.fit(train_prophet_df)
         
-        # Make forecast for test period
+                                       
         future = eval_model.make_future_dataframe(periods=len(test_data), freq='4H')
         
-        # Add regressors for future
+                                   
         for regressor in available_regressors:
             if regressor in future.columns:
                 last_value = train_data[regressor].dropna().iloc[-1]
@@ -237,10 +237,10 @@ class WaterQualityProphet:
         
         forecast = eval_model.predict(future)
         
-        # Get predictions for test period
+                                         
         test_forecast = forecast[forecast['ds'] > split_date]
         
-        # Calculate metrics
+                           
         actual = test_data[target_column].values
         predicted = test_forecast['yhat'].values[:len(actual)]
         
@@ -286,18 +286,18 @@ class WaterQualityProphet:
         
         model = self.models[target_column][station]
         
-        # Make forecast
+                       
         future = model.make_future_dataframe(periods=periods, freq='4H')
         forecast = model.predict(future)
         
-        # Create subplots
+                         
         fig = make_subplots(
             rows=2, cols=1,
             subplot_titles=(f'Forecast for {station} - {target_column}', 'Components'),
             vertical_spacing=0.1
         )
         
-        # Plot forecast
+                       
         fig.add_trace(
             go.Scatter(
                 x=forecast['ds'],
@@ -309,7 +309,7 @@ class WaterQualityProphet:
             row=1, col=1
         )
         
-        # Add confidence intervals
+                                  
         fig.add_trace(
             go.Scatter(
                 x=forecast['ds'],
@@ -335,7 +335,7 @@ class WaterQualityProphet:
             row=1, col=1
         )
         
-        # Plot trend component
+                              
         fig.add_trace(
             go.Scatter(
                 x=forecast['ds'],
@@ -365,23 +365,23 @@ class WaterQualityProphet:
         
         model = self.models[target_column][station]
         
-        # Get model parameters
+                              
         insights = {
             'changepoints': model.changepoints.tolist(),
             'seasonality_modes': model.seasonality_mode,
             'regressors': list(model.extra_regressors.keys()) if hasattr(model, 'extra_regressors') else []
         }
         
-        # Get forecast for analysis
+                                   
         future = model.make_future_dataframe(periods=0)
         forecast = model.predict(future)
         
-        # Analyze trend
+                       
         trend_data = forecast['trend']
         insights['trend_direction'] = 'increasing' if trend_data.iloc[-1] > trend_data.iloc[0] else 'decreasing'
         insights['trend_magnitude'] = abs(trend_data.iloc[-1] - trend_data.iloc[0])
         
-        # Analyze seasonality
+                             
         if 'yearly' in forecast.columns:
             yearly_seasonality = forecast['yearly'].std()
             insights['yearly_seasonality_strength'] = yearly_seasonality
@@ -394,13 +394,13 @@ class WaterQualityProphet:
 
 def main():
     """Example usage"""
-    # Load processed data
+                         
     df = pd.read_parquet("data/processed_water_quality.parquet")
     
-    # Define target variables
+                             
     targets = ['ph', 'dissolved_oxygen', 'ammonia_nitrogen', 'total_phosphorus']
     
-    # Initialize Prophet model
+                              
     prophet_model = WaterQualityProphet(
         yearly_seasonality=True,
         weekly_seasonality=True,
@@ -408,13 +408,13 @@ def main():
         changepoint_prior_scale=0.05
     )
     
-    # Train models
+                  
     prophet_model.train_multi_station(df, targets)
     
-    # Make forecasts
+                    
     forecasts = prophet_model.forecast(df, targets, periods=168, freq='4H')
     
-    # Evaluate models
+                     
     metrics = prophet_model.evaluate_all_models(df, targets, test_days=30)
     
     print("Prophet model training and evaluation completed")

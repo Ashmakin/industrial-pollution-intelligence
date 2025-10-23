@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-// API base configuration
+
 const API_BASE_URL = 'http://localhost:8080';
 
 const apiClient = axios.create({
@@ -11,7 +11,7 @@ const apiClient = axios.create({
   },
 });
 
-// Generic API response type
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -19,7 +19,7 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-// Data types
+
 export interface WaterQualityRecord {
   id: number;
   station_name: string;
@@ -66,7 +66,7 @@ export interface ParameterStatistics {
 export interface ForecastRequest {
   station: string;
   parameter: string;
-  horizon: number; // hours
+  horizon: number; 
   model: 'lstm' | 'prophet' | 'ensemble';
 }
 
@@ -103,7 +103,7 @@ export interface AnalysisRequest {
   };
 }
 
-// Error handling utility
+
 export const handleApiError = (error: any): string => {
   if (error.response?.data?.message) {
     return error.response.data.message;
@@ -117,7 +117,7 @@ export const handleApiError = (error: any): string => {
   return 'An unexpected error occurred';
 };
 
-// Health check
+
 export const checkHealth = async (): Promise<ApiResponse<any>> => {
   try {
     const response = await apiClient.get('/health');
@@ -127,7 +127,7 @@ export const checkHealth = async (): Promise<ApiResponse<any>> => {
   }
 };
 
-// Water quality data endpoints
+
 
 export const getMeasurements = async (params?: {
   station_name?: string;
@@ -158,7 +158,7 @@ export const getStatistics = async (params?: {
   }
 };
 
-// Data collection endpoints
+
 export const getCollectionStatus = async (): Promise<ApiResponse<any>> => {
   try {
     const response = await apiClient.get('/api/data/status');
@@ -168,7 +168,7 @@ export const getCollectionStatus = async (): Promise<ApiResponse<any>> => {
   }
 };
 
-// Forecasting endpoints
+
 export const generateForecast = async (request: ForecastRequest): Promise<ApiResponse<ForecastResult>> => {
   try {
     const response = await apiClient.post('/api/forecast/generate', request);
@@ -190,7 +190,7 @@ export const getForecasts = async (params?: {
   }
 };
 
-// Analysis endpoints
+
 export const runAnalysis = async (request: AnalysisRequest): Promise<ApiResponse<any>> => {
   try {
     const analysisType = request.analysis_type || 'pca';
@@ -220,7 +220,7 @@ export const getAnalysisResults = async (params?: {
   }
 };
 
-// Reports endpoints
+
 export const generateReport = async (params: {
   report_type: 'summary' | 'detailed' | 'forecast';
   stations?: string[];
@@ -237,7 +237,7 @@ export const generateReport = async (params: {
   }
 };
 
-// Enhanced data collection functions
+
 export const startDataCollection = async (request: {
   areas?: string[];
   basins?: string[];
@@ -256,7 +256,7 @@ export const startDataCollection = async (request: {
   }
 };
 
-// Get available areas
+
 export const getAreas = async (): Promise<ApiResponse<any[]>> => {
   try {
     const response = await apiClient.get('/api/areas');
@@ -270,7 +270,7 @@ export const getAreas = async (): Promise<ApiResponse<any[]>> => {
   }
 };
 
-// Get available basins
+
 export const getBasins = async (): Promise<ApiResponse<any[]>> => {
   try {
     const response = await apiClient.get('/api/basins');
@@ -284,7 +284,7 @@ export const getBasins = async (): Promise<ApiResponse<any[]>> => {
   }
 };
 
-// Get stations for specific area or all stations
+
 export const getStations = async (areaId?: string): Promise<ApiResponse<any[]>> => {
   try {
     const url = areaId ? `/api/pollution/stations?province=${encodeURIComponent(areaId)}` : '/api/pollution/stations';

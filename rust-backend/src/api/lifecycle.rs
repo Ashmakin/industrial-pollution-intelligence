@@ -33,13 +33,13 @@ pub struct ApiResponse<T> {
 pub async fn get_product_lifecycle_data(
     Query(params): Query<LifecycleQuery>,
 ) -> Result<Json<ApiResponse<Vec<ProductLifecycleData>>>, StatusCode> {
-    // Placeholder implementation
-    // In a real implementation, this would fetch data from the database
-    // or call the Python lifecycle tracking module
+    
+    
+    
 
     let mut lifecycle_data = Vec::new();
 
-    // Sample data for smartphone manufacturing
+    
     let mut pollutants = HashMap::new();
     pollutants.insert("copper".to_string(), 0.001);
     pollutants.insert("lead".to_string(), 0.0005);
@@ -65,7 +65,7 @@ pub async fn get_product_lifecycle_data(
 pub async fn get_pollution_correlation(
     Query(params): Query<LifecycleQuery>,
 ) -> Result<Json<ApiResponse<HashMap<String, f64>>>, StatusCode> {
-    // Placeholder implementation for pollution correlation analysis
+    
     let mut correlations = HashMap::new();
     
     correlations.insert("manufacturing_to_water_quality".to_string(), 0.75);

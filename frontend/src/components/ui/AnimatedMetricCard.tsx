@@ -96,7 +96,7 @@ export const AnimatedMetricCard: React.FC<AnimatedMetricCardProps> = ({
       id={`metric-${title}`}
       className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/30 border border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${className}`}
     >
-      {/* Animated background */}
+      {}
       <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <div className="relative p-6">

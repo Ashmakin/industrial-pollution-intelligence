@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 中国地图轮廓图（Choropleth Map）可视化系统
 - 使用真实的中国地图边界数据
@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional
 import os
 
-# 配置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class ChinaChoroplethMap:
     def __init__(self, db_url: str):
         self.db_url = db_url
         
-        # 中国各省市GeoJSON数据（简化版）
+                             
         self.china_geojson = {
             "type": "FeatureCollection",
             "features": [
@@ -280,27 +280,27 @@ class ChinaChoroplethMap:
             ]
         }
         
-        # 污染等级颜色映射（类似D3.js的颜色方案）
+                                
         self.color_schemes = {
             'sequential': {
-                'excellent': '#2E8B57',    # 海绿色
-                'good': '#90EE90',         # 浅绿色
-                'light': '#FFD700',        # 金黄色
-                'moderate': '#FF8C00',     # 深橙色
-                'heavy': '#FF4500',        # 橙红色
-                'severe': '#DC143C'        # 深红色
+                'excellent': '#2E8B57',         
+                'good': '#90EE90',              
+                'light': '#FFD700',             
+                'moderate': '#FF8C00',          
+                'heavy': '#FF4500',             
+                'severe': '#DC143C'             
             },
             'diverging': {
-                'excellent': '#2166AC',    # 深蓝色
-                'good': '#5AAE61',         # 绿色
-                'light': '#F7F7F7',        # 浅灰色
-                'moderate': '#F4A582',     # 浅橙色
-                'heavy': '#D6604D',        # 红色
-                'severe': '#B2182B'        # 深红色
+                'excellent': '#2166AC',         
+                'good': '#5AAE61',             
+                'light': '#F7F7F7',             
+                'moderate': '#F4A582',          
+                'heavy': '#D6604D',            
+                'severe': '#B2182B'             
             }
         }
         
-        # 参数阈值
+              
         self.parameter_thresholds = {
             'ph': {
                 'excellent': (6.5, 8.5),
@@ -341,7 +341,7 @@ class ChinaChoroplethMap:
         try:
             conn = psycopg2.connect(self.db_url)
             
-            # 根据参数选择正确的列名
+                         
             column_mapping = {
                 'ph': 'ph',
                 'temperature': 'temperature',
@@ -368,25 +368,25 @@ class ChinaChoroplethMap:
                 HAVING COUNT(*) > 0
             """
             
-            # 获取最近7天的数据
+                       
             start_date = datetime.now() - timedelta(days=7)
             df = pd.read_sql_query(query, conn, params=[start_date])
             conn.close()
             
-            # 处理数据，按省份聚合
+                        
             result = {}
             for _, row in df.iterrows():
                 station_name = row['station_name']
                 avg_value = row['avg_value']
                 
-                # 提取省份信息
+                        
                 province = self.extract_province_from_station(station_name)
                 if province:
                     if province not in result:
                         result[province] = []
                     result[province].append(avg_value)
             
-            # 计算每个省份的平均值
+                        
             province_averages = {}
             for province, values in result.items():
                 province_averages[province] = np.mean(values)
@@ -420,24 +420,24 @@ class ChinaChoroplethMap:
             if min_val <= value <= max_val:
                 return level
         
-        return 'severe'  # 默认严重污染
+        return 'severe'          
     
     def create_choropleth_map(self, parameter: str, color_scheme: str = 'sequential') -> Dict:
         """创建轮廓图地图数据"""
         try:
-            # 获取数据
+                  
             data = self.get_latest_data(parameter)
             
-            # 获取颜色方案
+                    
             colors = self.color_schemes.get(color_scheme, self.color_schemes['sequential'])
             
-            # 创建地图特征
+                    
             features = []
             for feature in self.china_geojson['features']:
                 province_name = feature['properties']['name']
                 province_code = feature['properties']['code']
                 
-                # 获取该省份的数据
+                          
                 if province_name in data:
                     value = data[province_name]
                     pollution_level = self.get_pollution_level(parameter, value)
@@ -447,7 +447,7 @@ class ChinaChoroplethMap:
                     pollution_level = 'no_data'
                     color = '#CCCCCC'
                 
-                # 创建新的特征
+                        
                 new_feature = {
                     "type": "Feature",
                     "properties": {
@@ -461,20 +461,20 @@ class ChinaChoroplethMap:
                 }
                 features.append(new_feature)
             
-            # 创建GeoJSON数据
+                         
             geojson_data = {
                 "type": "FeatureCollection",
                 "features": features
             }
             
-            # 创建地图配置
+                    
             map_config = {
                 "map_type": "choropleth",
                 "parameter": parameter,
                 "color_scheme": color_scheme,
                 "projection": "geoMercator",
                 "scale": 1000,
-                "center": [104.1954, 35.8617],  # 中国中心
+                "center": [104.1954, 35.8617],        
                 "zoom": 4,
                 "width": 800,
                 "height": 600
@@ -576,30 +576,25 @@ class ChinaChoroplethMap:
     </div>
 
     <script>
-        // 地图数据
         const mapData = {json.dumps(map_data, ensure_ascii=False)};
-        
-        // 设置SVG
+
         const width = 800;
         const height = 600;
         const svg = d3.select("#map")
             .attr("width", width)
             .attr("height", height);
-        
-        // 创建投影
+
         const projection = d3.geoMercator()
             .scale(1000)
             .center([104.1954, 35.8617])
             .translate([width / 2, height / 2]);
-        
+
         const path = d3.geoPath().projection(projection);
-        
-        // 创建工具提示
+
         const tooltip = d3.select("body").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
-        
-        // 绘制地图
+
         svg.selectAll(".province")
             .data(mapData.geojson_data.features)
             .enter().append("path")
@@ -625,7 +620,6 @@ class ChinaChoroplethMap:
                     .style("opacity", 0);
             }});
         
-        // 创建图例
         const legendData = [
             {{color: '#2E8B57', label: '优秀'}},
             {{color: '#90EE90', label: '良好'}},

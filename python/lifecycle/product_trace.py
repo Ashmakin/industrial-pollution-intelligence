@@ -22,10 +22,10 @@ class PollutionImpact:
     """Data structure for pollution impact at each manufacturing stage"""
     stage: str
     location: str
-    pollutants: Dict[str, float]  # pollutant -> kg_per_unit
-    water_usage: float  # liters per unit
-    energy_consumption: float  # kWh per unit
-    waste_generation: float  # kg per unit
+    pollutants: Dict[str, float]                            
+    water_usage: float                   
+    energy_consumption: float                
+    waste_generation: float               
 
 class SmartphoneLifecycleTracker:
     """Tracks pollution across smartphone manufacturing lifecycle"""
@@ -39,22 +39,22 @@ class SmartphoneLifecycleTracker:
         """Initialize pollution impact data for each manufacturing stage"""
         
         pollution_data = [
-            # Raw Material Extraction
+                                     
             PollutionImpact(
                 stage="Mining - Rare Earth Elements",
                 location="Inner Mongolia, China",
                 pollutants={
-                    "heavy_metals": 0.05,  # kg per phone
+                    "heavy_metals": 0.05,                
                     "radioactive_waste": 0.01,
                     "acid_mine_drainage": 0.1,
                     "sediment": 0.5
                 },
-                water_usage=1000,  # liters per phone
+                water_usage=1000,                    
                 energy_consumption=50,
                 waste_generation=10
             ),
             
-            # Component Manufacturing
+                                     
             PollutionImpact(
                 stage="Circuit Board Manufacturing",
                 location="Shenzhen, Guangdong",
@@ -112,7 +112,7 @@ class SmartphoneLifecycleTracker:
                 waste_generation=0.1
             ),
             
-            # Final Assembly
+                            
             PollutionImpact(
                 stage="Device Assembly",
                 location="Zhengzhou, Henan",
@@ -126,7 +126,7 @@ class SmartphoneLifecycleTracker:
                 waste_generation=0.15
             ),
             
-            # Packaging
+                       
             PollutionImpact(
                 stage="Packaging",
                 location="Various",
@@ -196,7 +196,7 @@ class SmartphoneLifecycleTracker:
         
         G = nx.DiGraph()
         
-        # Add nodes (manufacturing stages)
+                                          
         for impact in self.pollution_impacts:
             G.add_node(
                 impact.stage,
@@ -207,7 +207,7 @@ class SmartphoneLifecycleTracker:
                 waste_generation=impact.waste_generation
             )
         
-        # Add edges (material flow)
+                                   
         supply_chain_flow = [
             ("Mining - Rare Earth Elements", "Circuit Board Manufacturing"),
             ("Mining - Rare Earth Elements", "Display Manufacturing"),
@@ -233,11 +233,11 @@ class SmartphoneLifecycleTracker:
         total_waste = 0
         
         for impact in self.pollution_impacts:
-            # Sum pollutants
+                            
             for pollutant, amount in impact.pollutants.items():
                 total_pollution[pollutant] = total_pollution.get(pollutant, 0) + amount
             
-            # Sum other impacts
+                               
             total_water += impact.water_usage
             total_energy += impact.energy_consumption
             total_waste += impact.waste_generation
@@ -263,7 +263,7 @@ class SmartphoneLifecycleTracker:
                     "waste_generation": 0
                 }
             
-            # Scale by production volume
+                                        
             for pollutant, amount in impact.pollutants.items():
                 regional_impact[location]["pollutants"][pollutant] = (
                     regional_impact[location]["pollutants"].get(pollutant, 0) + 
@@ -286,7 +286,7 @@ class SmartphoneLifecycleTracker:
             area_id = zone_data["area_id"]
             monitoring_stations = zone_data["monitoring_stations"]
             
-            # Filter water quality data for this region
+                                                       
             zone_water_data = water_quality_df[
                 (water_quality_df['area_id'] == area_id) |
                 (water_quality_df['station_name'].isin(monitoring_stations))
@@ -295,20 +295,20 @@ class SmartphoneLifecycleTracker:
             if len(zone_water_data) == 0:
                 continue
             
-            # Get manufacturing stages in this zone
+                                                   
             zone_manufacturing = [
                 impact for impact in self.pollution_impacts 
                 if zone_name in impact.location
             ]
             
             for manufacturing_stage in zone_manufacturing:
-                # Simulate production schedule (higher production during weekdays)
+                                                                                  
                 zone_water_data_copy = zone_water_data.copy()
                 zone_water_data_copy['manufacturing_intensity'] = self._simulate_production_schedule(
                     zone_water_data_copy['monitoring_time']
                 )
                 
-                # Calculate correlation between production intensity and pollution levels
+                                                                                         
                 pollution_indicators = ['ammonia_nitrogen', 'total_phosphorus', 'conductivity', 'turbidity']
                 
                 for indicator in pollution_indicators:
@@ -334,24 +334,24 @@ class SmartphoneLifecycleTracker:
         production_intensity = []
         
         for timestamp in timestamps:
-            # Higher production during weekdays (Monday=0, Sunday=6)
+                                                                    
             weekday = timestamp.weekday()
             hour = timestamp.hour
             
-            # Base intensity: higher on weekdays
+                                                
             base_intensity = 1.0 if weekday < 5 else 0.3
             
-            # Hourly variation: production peaks during day shift
+                                                                 
             if 8 <= hour <= 17:
                 hourly_factor = 1.0
             elif 18 <= hour <= 22:
-                hourly_factor = 0.8  # Evening shift
+                hourly_factor = 0.8                 
             elif 23 <= hour or hour <= 7:
-                hourly_factor = 0.6  # Night shift
+                hourly_factor = 0.6               
             else:
                 hourly_factor = 0.5
             
-            # Add some random variation
+                                       
             random_factor = np.random.normal(1.0, 0.1)
             
             intensity = base_intensity * hourly_factor * random_factor
@@ -370,7 +370,7 @@ class SmartphoneLifecycleTracker:
         if not stage_data:
             return {}
         
-        # Create pollution signature with relative concentrations
+                                                                 
         signature = {
             'stage': manufacturing_stage,
             'location': stage_data.location,
@@ -382,7 +382,7 @@ class SmartphoneLifecycleTracker:
             }
         }
         
-        # Normalize pollutant concentrations
+                                            
         total_pollution = sum(stage_data.pollutants.values())
         for pollutant, amount in stage_data.pollutants.items():
             signature['pollution_profile'][pollutant] = {
@@ -396,7 +396,7 @@ class SmartphoneLifecycleTracker:
     def _assess_risk_level(self, pollutant: str, concentration: float) -> str:
         """Assess risk level of pollutant based on concentration"""
         
-        # Risk thresholds (kg per phone)
+                                        
         risk_thresholds = {
             'heavy_metals': 0.05,
             'radioactive_waste': 0.01,
@@ -424,7 +424,7 @@ class SmartphoneLifecycleTracker:
         nodes = []
         links = []
         
-        # Add nodes
+                   
         for impact in self.pollution_impacts:
             total_pollution = sum(impact.pollutants.values())
             
@@ -439,7 +439,7 @@ class SmartphoneLifecycleTracker:
                 'pollutants': impact.pollutants
             })
         
-        # Add links
+                   
         for edge in self.supply_chain_graph.edges(data=True):
             links.append({
                 'source': edge[0],
@@ -468,7 +468,7 @@ class WaterQualityCorrelationAnalyzer:
         
         correlations_df = self.lifecycle_tracker.correlate_with_water_quality_data(water_quality_df)
         
-        # Add statistical significance
+                                      
         correlations_df['significant'] = correlations_df['correlation'].abs() > 0.3
         correlations_df['strength'] = correlations_df['correlation'].abs().apply(
             lambda x: 'strong' if x > 0.5 else 'moderate' if x > 0.3 else 'weak'
@@ -481,7 +481,7 @@ class WaterQualityCorrelationAnalyzer:
         
         correlations_df = self.analyze_temporal_correlations(water_quality_df)
         
-        # Group by zone and calculate average correlation
+                                                         
         zone_correlations = correlations_df.groupby('zone').agg({
             'correlation': ['mean', 'max', 'count'],
             'significant': 'sum'
@@ -490,7 +490,7 @@ class WaterQualityCorrelationAnalyzer:
         zone_correlations.columns = ['avg_correlation', 'max_correlation', 'measurement_count', 'significant_count']
         zone_correlations = zone_correlations.reset_index()
         
-        # Identify hotspots (high correlation zones)
+                                                    
         hotspots = zone_correlations[
             (zone_correlations['avg_correlation'] > 0.2) |
             (zone_correlations['max_correlation'] > 0.4)
@@ -514,19 +514,19 @@ class WaterQualityCorrelationAnalyzer:
 
 def main():
     """Example usage"""
-    # Load water quality data
+                             
     df = pd.read_parquet("data/processed_water_quality.parquet")
     
-    # Initialize lifecycle tracker
+                                  
     tracker = SmartphoneLifecycleTracker()
     
-    # Calculate total pollution per phone
+                                         
     total_pollution = tracker.calculate_total_pollution_per_phone()
     print("Total pollution per smartphone:")
     for pollutant, amount in total_pollution.items():
         print(f"  {pollutant}: {amount:.3f}")
     
-    # Analyze correlations with water quality
+                                             
     analyzer = WaterQualityCorrelationAnalyzer(tracker)
     correlations = analyzer.analyze_temporal_correlations(df)
     
@@ -534,13 +534,13 @@ def main():
     significant_correlations = correlations[correlations['significant']]
     print(f"Significant correlations: {len(significant_correlations)}")
     
-    # Identify pollution hotspots
+                                 
     hotspots = analyzer.identify_pollution_hotspots(df)
     print(f"\nPollution hotspots identified: {len(hotspots)}")
-    for hotspot in hotspots[:3]:  # Top 3
+    for hotspot in hotspots[:3]:         
         print(f"  {hotspot['zone']}: avg_correlation={hotspot['avg_correlation']:.3f}")
     
-    # Generate network data for visualization
+                                             
     network_data = tracker.create_supply_chain_network_data()
     print(f"\nSupply chain network: {network_data['metadata']['total_nodes']} nodes, {network_data['metadata']['total_links']} links")
     

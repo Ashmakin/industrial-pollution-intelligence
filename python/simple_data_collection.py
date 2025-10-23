@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 简化版数据采集脚本 - 生成模拟数据并存储到数据库
 """
@@ -53,7 +53,7 @@ def store_data_to_db(data: list, database_url: str):
         stored_count = 0
         for record in data:
             try:
-                # 插入水质数据
+                        
                 insert_query = """
                 INSERT INTO water_quality_data (
                     station_name, station_code, province, watershed,
@@ -102,7 +102,7 @@ def main():
     
     args = parser.parse_args()
     
-    # 区域ID到站点名称的映射
+                  
     area_stations = {
         110000: "Beijing Station",
         310000: "Shanghai Station", 
@@ -121,10 +121,10 @@ def main():
         try:
             print(f"为区域 {area_id} ({station_name}) 生成 {records_per_area} 条数据...")
             
-            # 生成模拟数据
+                    
             mock_data = generate_mock_data(station_name, records_per_area)
             
-            # 存储到数据库
+                    
             stored_count = store_data_to_db(mock_data, args.database_url)
             total_collected += stored_count
             

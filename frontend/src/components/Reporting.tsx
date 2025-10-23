@@ -51,7 +51,7 @@ const Reporting: React.FC = () => {
   const [selectedBasin, setSelectedBasin] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 完整的中国省市列表
+  
   const provinces = [
     '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江',
     '上海', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南',
@@ -80,13 +80,13 @@ const Reporting: React.FC = () => {
     }
   ];
 
-  // 获取监测站点数据
+  
   const fetchStations = async () => {
     setLoading(true);
     try {
       const response = await getStations();
       if (response.success && response.data) {
-        // 将API返回的数据转换为组件需要的格式
+        
         const stations = response.data.map((station: any) => ({
           name: station.station_name,
           basin: station.watershed || '未知流域',
@@ -101,7 +101,7 @@ const Reporting: React.FC = () => {
     }
   };
 
-  // 根据省份和流域过滤监测站
+  
   const filteredStations = availableStations.filter(station => {
     if (selectedProvince && station.province !== selectedProvince) return false;
     if (selectedBasin && station.basin !== selectedBasin) return false;
@@ -117,24 +117,24 @@ const Reporting: React.FC = () => {
     }));
   };
 
-  // 组件加载时获取监测站点数据
+  
   useEffect(() => {
     fetchStations();
   }, []);
 
-  // 当选择省份时，动态加载该省份的监测站点
+  
   useEffect(() => {
     if (selectedProvince) {
       loadStationsForProvince(selectedProvince);
     }
   }, [selectedProvince]);
 
-  // 根据省份加载监测站点
+  
   const loadStationsForProvince = async (province: string) => {
     try {
       const response = await getStations(province);
       if (response.success && response.data && response.data.length > 0) {
-        // 将API返回的数据转换为组件需要的格式
+        
         const stations = response.data.map((station: any) => ({
           name: station.station_name,
           basin: station.watershed || '未知流域',
@@ -188,7 +188,7 @@ const Reporting: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -202,9 +202,9 @@ const Reporting: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 左侧：报表配置 */}
+          {}
           <div className="lg:col-span-2 space-y-6">
-            {/* 报告类型选择 */}
+            {}
             <Card variant="elevated">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -240,7 +240,7 @@ const Reporting: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* 监测站点选择 */}
+            {}
             <Card variant="elevated">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -249,7 +249,7 @@ const Reporting: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* 省份选择 */}
+                {}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     选择省份
@@ -266,7 +266,7 @@ const Reporting: React.FC = () => {
                   />
                 </div>
 
-                {/* 流域选择 */}
+                {}
                 {selectedProvince && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -284,7 +284,7 @@ const Reporting: React.FC = () => {
                   </div>
                 )}
 
-                {/* 监测站点选择 */}
+                {}
                 {selectedProvince && availableStations.length > 0 && (
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -344,7 +344,7 @@ const Reporting: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* 时间范围和报告选项 */}
+            {}
             <Card variant="elevated">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -353,7 +353,7 @@ const Reporting: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* 时间范围 */}
+                {}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">时间范围</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -384,7 +384,7 @@ const Reporting: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 报告选项 */}
+                {}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">报告选项</h4>
                   <div className="space-y-3">
@@ -423,7 +423,7 @@ const Reporting: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* 生成报告按钮 */}
+            {}
             <div className="flex justify-center">
               <Button
                 onClick={generateNewReport}
@@ -445,7 +445,7 @@ const Reporting: React.FC = () => {
             </div>
           </div>
 
-          {/* 右侧：已生成的报告 */}
+          {}
           <div className="lg:col-span-1">
             <Card variant="elevated" className="sticky top-8">
               <CardHeader>
@@ -506,7 +506,7 @@ const Reporting: React.FC = () => {
           </div>
         </div>
 
-        {/* 报告模板预览 */}
+        {}
         <div className="mt-8">
           <Card variant="elevated">
             <CardHeader>
@@ -517,7 +517,7 @@ const Reporting: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* 执行摘要预览 */}
+                {}
                 <div className="border rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                     <BarChart3 className="h-4 w-4 mr-2 text-blue-500" />
@@ -531,7 +531,7 @@ const Reporting: React.FC = () => {
                   </ul>
                 </div>
 
-                {/* 数据分析预览 */}
+                {}
                 <div className="border rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                     <TrendingUp className="h-4 w-4 mr-2 text-green-500" />
@@ -545,7 +545,7 @@ const Reporting: React.FC = () => {
                   </ul>
                 </div>
 
-                {/* 预测分析预览 */}
+                {}
                 <div className="border rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                     <AlertTriangle className="h-4 w-4 mr-2 text-orange-500" />
@@ -559,7 +559,7 @@ const Reporting: React.FC = () => {
                   </ul>
                 </div>
 
-                {/* 政策建议预览 */}
+                {}
                 <div className="border rounded-lg p-4 md:col-span-2 lg:col-span-3">
                   <h4 className="font-medium text-gray-900 mb-3 flex items-center">
                     <Filter className="h-4 w-4 mr-2 text-purple-500" />

@@ -129,7 +129,7 @@ pub async fn get_forecast_by_id(
     }
 }
 
-// 生成预测端点
+
 pub async fn generate_forecast(
     State(_pool): State<PgPool>,
     axum::Json(request): axum::Json<ForecastRequest>,
@@ -137,7 +137,7 @@ pub async fn generate_forecast(
     println!("Generating forecast for station: {}, parameter: {}, model: {}", 
              request.station, request.parameter, request.model);
 
-    // 根据模型类型选择不同的Python脚本
+    
     let script_command = if request.model == "sarimax" {
         format!(
             "cd /Users/aphrodite/Desktop/Rustindp/python && source venv/bin/activate && python3 advanced_ml_models.py \
@@ -173,7 +173,7 @@ pub async fn generate_forecast(
                 let result_str = String::from_utf8_lossy(&output.stdout);
                 println!("Python forecasting output: {}", result_str);
 
-                // 解析JSON结果
+                
                 match serde_json::from_str::<ForecastResult>(&result_str) {
                     Ok(forecast_result) => {
                         println!("Successfully parsed forecast result");
@@ -186,7 +186,7 @@ pub async fn generate_forecast(
                     Err(e) => {
                         println!("Failed to parse forecast result: {}", e);
                         println!("Raw output: {}", result_str);
-                        // 返回模拟数据
+                        
                         let mock_result = ForecastResult {
                             station_name: request.station.clone(),
                             parameter: request.parameter.clone(),
@@ -207,7 +207,7 @@ pub async fn generate_forecast(
                 let error_str = String::from_utf8_lossy(&output.stderr);
                 println!("Python forecasting failed: {}", error_str);
                 
-                // 返回模拟数据作为后备
+                
                 let mock_result = ForecastResult {
                     station_name: request.station.clone(),
                     parameter: request.parameter.clone(),
@@ -231,12 +231,12 @@ pub async fn generate_forecast(
     }
 }
 
-// 获取预测列表端点
+
 pub async fn get_forecast_list(
     State(_pool): State<PgPool>,
     Query(params): Query<ForecastQuery>,
 ) -> Result<Json<ApiResponse<Vec<ForecastResult>>>, StatusCode> {
-    // 返回模拟数据
+    
     let station_name = params.station_name.unwrap_or_else(|| "Beijing Station".to_string());
     let parameter = params.parameter.unwrap_or_else(|| "ph".to_string());
     
@@ -259,31 +259,31 @@ pub async fn get_forecast_list(
     }))
 }
 
-// 生成模拟预测数据
+
 fn generate_mock_predictions(horizon: i32, parameter: &str) -> Vec<PredictionPoint> {
     let mut predictions = Vec::new();
     
-    // 根据不同参数设置不同的基值和特征
+    
     let (base_value, amplitude, frequency, trend) = match parameter {
-        "ph" => (7.2, 0.5, 0.1, 0.0), // pH值：中性附近，小幅波动
-        "ammonia_nitrogen" => (1.5, 0.8, 0.15, -0.02), // 氨氮：较高值，下降趋势
-        "dissolved_oxygen" => (8.5, 1.2, 0.08, 0.01), // 溶解氧：较高值，上升趋势
-        "total_phosphorus" => (0.15, 0.1, 0.12, -0.01), // 总磷：较低值，下降趋势
-        "temperature" => (20.0, 3.0, 0.05, 0.0), // 温度：季节性变化
-        "conductivity" => (450.0, 50.0, 0.07, 0.5), // 电导率：较高值，缓慢上升
-        _ => (5.0, 1.0, 0.1, 0.0), // 默认值
+        "ph" => (7.2, 0.5, 0.1, 0.0), 
+        "ammonia_nitrogen" => (1.5, 0.8, 0.15, -0.02), 
+        "dissolved_oxygen" => (8.5, 1.2, 0.08, 0.01), 
+        "total_phosphorus" => (0.15, 0.1, 0.12, -0.01), 
+        "temperature" => (20.0, 3.0, 0.05, 0.0), 
+        "conductivity" => (450.0, 50.0, 0.07, 0.5), 
+        _ => (5.0, 1.0, 0.1, 0.0), 
     };
     
     let mut current_time = chrono::Utc::now();
 
     for i in 0..horizon {
-        // 添加趋势、周期性变化和随机噪声
+        
         let trend_effect = trend * i as f64;
         let periodic_variation = (i as f64 * frequency).sin() * amplitude;
-        let noise = (i as f64 * 0.3).cos() * 0.1 * amplitude; // 添加噪声
+        let noise = (i as f64 * 0.3).cos() * 0.1 * amplitude; 
         let predicted_value = base_value + trend_effect + periodic_variation + noise;
         
-        // 根据参数类型调整置信区间
+        
         let confidence = match parameter {
             "ph" => 0.2,
             "ammonia_nitrogen" => 0.3,
@@ -307,7 +307,7 @@ fn generate_mock_predictions(horizon: i32, parameter: &str) -> Vec<PredictionPoi
     predictions
 }
 
-// 根据参数类型生成相应的模型性能指标
+
 fn generate_model_metrics(parameter: &str) -> ModelMetrics {
     match parameter {
         "ph" => ModelMetrics {

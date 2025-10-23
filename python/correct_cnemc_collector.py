@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 正确的CNEMC数据收集器
 使用用户提供的真实API链接和参数
@@ -15,7 +15,7 @@ import requests
 import time
 import os
 
-# 配置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class CorrectCNEMCCollector:
         self.db_url = db_url
         self.base_url = "https://szzdjc.cnemc.cn:8070/GJZ/Ajax/Publish.ashx"
         
-        # 中国各省市代码
+                 
         self.area_codes = {
             '北京': '110000',
             '天津': '120000', 
@@ -61,7 +61,7 @@ class CorrectCNEMCCollector:
             '新疆': '650000'
         }
         
-        # 参数映射
+              
         self.parameter_mapping = {
             'pH': 'ph',
             '溶解氧': 'dissolved_oxygen',
@@ -89,13 +89,13 @@ class CorrectCNEMCCollector:
             response = requests.get(self.base_url, params=params, timeout=30)
             response.raise_for_status()
             
-            # 尝试解析JSON响应
+                        
             try:
                 data = response.json()
                 logger.info(f"Successfully fetched JSON data for area {area_id}")
                 return data
             except json.JSONDecodeError:
-                # 如果不是JSON，尝试解析为文本
+                                  
                 text_data = response.text.strip()
                 logger.info(f"Received text response for area {area_id}: {text_data}")
                 
@@ -103,7 +103,7 @@ class CorrectCNEMCCollector:
                     logger.warning(f"No data available for area {area_id}")
                     return {"data": [], "total": 0}
                 else:
-                    # 尝试解析其他格式
+                              
                     return {"raw_data": text_data, "total": 0}
                     
         except requests.exceptions.RequestException as e:
@@ -119,7 +119,7 @@ class CorrectCNEMCCollector:
         
         try:
             if "tbody" in data and isinstance(data["tbody"], list):
-                # 处理表格数据格式
+                          
                 logger.info(f"Processing table data for area {area_id}")
                 
                 for row in data["tbody"]:
@@ -134,9 +134,9 @@ class CorrectCNEMCCollector:
                         if parsed_item:
                             parsed_data.append(parsed_item)
             elif "raw_data" in data:
-                # 处理原始文本数据
+                          
                 logger.info(f"Processing raw data for area {area_id}")
-                # 这里可以添加更多解析逻辑
+                              
                 
         except Exception as e:
             logger.error(f"Error parsing data for area {area_id}: {e}")
@@ -146,61 +146,61 @@ class CorrectCNEMCCollector:
     def parse_table_row(self, row: List, area_id: str) -> Optional[Dict]:
         """解析表格行数据"""
         try:
-            # 表格列的顺序：省份、流域、断面名称、监测时间、水质类别、水温、pH、溶解氧、电导率、浊度、高锰酸盐指数、氨氮、总磷、总氮、叶绿素α、藻密度、站点情况
+                                                                                        
             if len(row) < 17:
                 return None
             
-            # 提取基本信息
+                    
             province = row[0] if row[0] else "未知"
             watershed = row[1] if row[1] else "未知"
             
-            # 提取断面名称（去除HTML标签）
+                              
             station_name_raw = row[2]
             station_name = self.extract_station_name(station_name_raw)
             
             monitoring_time_raw = row[3]
             monitoring_time = self.parse_monitoring_time(monitoring_time_raw)
             
-            # 提取参数数据
+                    
             parameter_data = {}
             
-            # 水温 (索引5)
+                      
             if row[5] and row[5] != "*":
                 temp_value = self.extract_numeric_value(row[5])
                 if temp_value is not None:
                     parameter_data['temperature'] = temp_value
             
-            # pH (索引6)
+                      
             if row[6] and row[6] != "*":
                 ph_value = self.extract_numeric_value(row[6])
                 if ph_value is not None:
                     parameter_data['ph'] = ph_value
             
-            # 溶解氧 (索引7)
+                       
             if row[7] and row[7] != "*":
                 do_value = self.extract_numeric_value(row[7])
                 if do_value is not None:
                     parameter_data['dissolved_oxygen'] = do_value
             
-            # 电导率 (索引8)
+                       
             if row[8] and row[8] != "*":
                 ec_value = self.extract_numeric_value(row[8])
                 if ec_value is not None:
                     parameter_data['conductivity'] = ec_value
             
-            # 浊度 (索引9)
+                      
             if row[9] and row[9] != "*":
                 turb_value = self.extract_numeric_value(row[9])
                 if turb_value is not None:
                     parameter_data['turbidity'] = turb_value
             
-            # 氨氮 (索引11)
+                       
             if row[11] and row[11] != "*":
                 nh3n_value = self.extract_numeric_value(row[11])
                 if nh3n_value is not None:
                     parameter_data['ammonia_nitrogen'] = nh3n_value
             
-            # 总磷 (索引12)
+                       
             if row[12] and row[12] != "*":
                 tp_value = self.extract_numeric_value(row[12])
                 if tp_value is not None:
@@ -209,7 +209,7 @@ class CorrectCNEMCCollector:
             if not parameter_data:
                 return None
             
-            # 计算水质等级和污染指数
+                         
             water_quality_grade = self.calculate_water_quality_grade(parameter_data)
             pollution_index = self.calculate_pollution_index(parameter_data)
             
@@ -234,9 +234,9 @@ class CorrectCNEMCCollector:
         """从HTML中提取站点名称"""
         try:
             import re
-            # 移除HTML标签
+                      
             clean_name = re.sub(r'<[^>]+>', '', station_name_raw)
-            # 移除多余的空白字符
+                       
             clean_name = re.sub(r'\s+', ' ', clean_name).strip()
             return clean_name if clean_name else "未知站点"
         except Exception:
@@ -249,10 +249,10 @@ class CorrectCNEMCCollector:
             if not value_str or value_str == "*":
                 return None
             
-            # 移除HTML标签
+                      
             clean_value = re.sub(r'<[^>]+>', '', value_str)
             
-            # 提取数值（支持小数）
+                        
             match = re.search(r'(\d+\.?\d*)', clean_value)
             if match:
                 return float(match.group(1))
@@ -267,7 +267,7 @@ class CorrectCNEMCCollector:
             if not time_str or time_str == "*":
                 return datetime.now().isoformat()
             
-            # 格式：10-22 12:00
+                            
             if "-" in time_str and ":" in time_str:
                 current_year = datetime.now().year
                 time_str = f"{current_year}-{time_str}"
@@ -281,26 +281,26 @@ class CorrectCNEMCCollector:
     def parse_data_item(self, item: Dict, area_id: str) -> Optional[Dict]:
         """解析单个数据项"""
         try:
-            # 提取基本信息
+                    
             station_name = item.get('MNName', f'监测站_{area_id}')
             station_code = item.get('MNCode', area_id)
             monitoring_time = item.get('MonitorTime', datetime.now().isoformat())
             
-            # 提取参数数据
+                    
             parameter_data = {}
             
-            # 常见的水质参数
+                     
             parameters = {
                 'pH': item.get('pH'),
-                '溶解氧': item.get('DO'),  # Dissolved Oxygen
-                '氨氮': item.get('NH3N'),  # Ammonia Nitrogen
-                '总磷': item.get('TP'),    # Total Phosphorus
-                '温度': item.get('WT'),    # Water Temperature
-                '电导率': item.get('EC'),   # Electrical Conductivity
-                '浊度': item.get('TU')     # Turbidity
+                '溶解氧': item.get('DO'),                    
+                '氨氮': item.get('NH3N'),                    
+                '总磷': item.get('TP'),                      
+                '温度': item.get('WT'),                       
+                '电导率': item.get('EC'),                            
+                '浊度': item.get('TU')                
             }
             
-            # 处理参数值
+                   
             for param_name, value in parameters.items():
                 if value is not None and value != '' and value != '-':
                     try:
@@ -314,11 +314,11 @@ class CorrectCNEMCCollector:
                 logger.warning(f"No valid parameter data found for station {station_name}")
                 return None
             
-            # 计算水质等级和污染指数
+                         
             water_quality_grade = self.calculate_water_quality_grade(parameter_data)
             pollution_index = self.calculate_pollution_index(parameter_data)
             
-            # 提取省份和流域信息
+                       
             province = self.get_province_from_area_id(area_id)
             watershed = self.get_watershed_from_station_name(station_name)
             
@@ -342,36 +342,36 @@ class CorrectCNEMCCollector:
     def calculate_water_quality_grade(self, parameters: Dict) -> int:
         """计算水质等级"""
         try:
-            # 基于主要参数计算水质等级
-            grade = 1  # 默认优秀
+                          
+            grade = 1        
             
-            # pH值评分
+                   
             if 'ph' in parameters:
                 ph = parameters['ph']
                 if ph < 6.0 or ph > 9.0:
-                    grade = max(grade, 5)  # 重度污染
+                    grade = max(grade, 5)        
                 elif ph < 6.5 or ph > 8.5:
-                    grade = max(grade, 3)  # 轻度污染
+                    grade = max(grade, 3)        
             
-            # 溶解氧评分
+                   
             if 'dissolved_oxygen' in parameters:
                 do = parameters['dissolved_oxygen']
                 if do < 2.0:
-                    grade = max(grade, 6)  # 严重污染
+                    grade = max(grade, 6)        
                 elif do < 3.0:
-                    grade = max(grade, 5)  # 重度污染
+                    grade = max(grade, 5)        
                 elif do < 5.0:
-                    grade = max(grade, 3)  # 轻度污染
+                    grade = max(grade, 3)        
             
-            # 氨氮评分
+                  
             if 'ammonia_nitrogen' in parameters:
                 nh3n = parameters['ammonia_nitrogen']
                 if nh3n > 5.0:
-                    grade = max(grade, 6)  # 严重污染
+                    grade = max(grade, 6)        
                 elif nh3n > 2.0:
-                    grade = max(grade, 5)  # 重度污染
+                    grade = max(grade, 5)        
                 elif nh3n > 1.0:
-                    grade = max(grade, 3)  # 轻度污染
+                    grade = max(grade, 3)        
             
             return grade
             
@@ -385,29 +385,29 @@ class CorrectCNEMCCollector:
             index = 0.0
             count = 0
             
-            # 基于主要参数计算污染指数
+                          
             if 'ph' in parameters:
                 ph = parameters['ph']
-                # pH偏离7.0的程度
+                            
                 index += abs(ph - 7.0) * 2
                 count += 1
             
             if 'dissolved_oxygen' in parameters:
                 do = parameters['dissolved_oxygen']
-                # 溶解氧越低，污染指数越高
+                              
                 if do < 7.5:
                     index += (7.5 - do) * 0.5
                 count += 1
             
             if 'ammonia_nitrogen' in parameters:
                 nh3n = parameters['ammonia_nitrogen']
-                # 氨氮浓度越高，污染指数越高
+                               
                 index += nh3n * 2
                 count += 1
             
             if 'total_phosphorus' in parameters:
                 tp = parameters['total_phosphorus']
-                # 总磷浓度越高，污染指数越高
+                               
                 index += tp * 5
                 count += 1
             
@@ -426,7 +426,7 @@ class CorrectCNEMCCollector:
     
     def get_watershed_from_station_name(self, station_name: str) -> str:
         """从站点名称获取流域信息"""
-        # 常见的流域关键词
+                  
         watersheds = {
             '长江': ['长江', '扬子江', '江'],
             '黄河': ['黄河', '河'],
@@ -456,7 +456,7 @@ class CorrectCNEMCCollector:
             conn = psycopg2.connect(self.db_url)
             cursor = conn.cursor()
             
-            # 准备插入语句
+                    
             insert_query = """
                 INSERT INTO water_quality_data 
                 (station_name, station_code, ph, temperature, dissolved_oxygen, ammonia_nitrogen, total_phosphorus, conductivity, turbidity, monitoring_time, province, watershed, water_quality_grade, pollution_index)
@@ -509,13 +509,13 @@ class CorrectCNEMCCollector:
             try:
                 logger.info(f"Collecting data for {province} ({area_id})")
                 
-                # 获取数据
+                      
                 raw_data = self.fetch_cnemc_data(area_id)
                 
-                # 解析数据
+                      
                 parsed_data = self.parse_cnemc_response(raw_data, area_id)
                 
-                # 存储数据
+                      
                 if parsed_data:
                     stored_count = self.store_data_to_db(parsed_data)
                     total_collected += stored_count
@@ -533,7 +533,7 @@ class CorrectCNEMCCollector:
                         'status': 'no_data'
                     }
                 
-                # 避免请求过于频繁
+                          
                 time.sleep(1)
                 
             except Exception as e:
@@ -560,8 +560,8 @@ def main():
     collector = CorrectCNEMCCollector(db_url)
     
     if len(sys.argv) > 1 and sys.argv[1] == 'test':
-        # 测试模式 - 只收集一个地区
-        test_area_id = '110000'  # 北京
+                        
+        test_area_id = '110000'      
         logger.info(f"Testing with area {test_area_id}")
         
         raw_data = collector.fetch_cnemc_data(test_area_id)
@@ -576,7 +576,7 @@ def main():
         
         print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
-        # 正常模式 - 收集所有地区
+                       
         result = collector.collect_all_data()
         print(json.dumps(result, indent=2, ensure_ascii=False))
 

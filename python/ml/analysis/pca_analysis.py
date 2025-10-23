@@ -38,38 +38,38 @@ class WaterQualityPCA:
     def fit_transform(self, df: pd.DataFrame, feature_columns: List[str]) -> Tuple[pd.DataFrame, pd.DataFrame]:
         """Fit PCA and transform data"""
         
-        # Select and scale features
+                                   
         X = df[feature_columns].dropna()
         
         if len(X) == 0:
             raise ValueError("No valid data points found")
         
-        # Scale features
+                        
         X_scaled = self.scaler.fit_transform(X)
         
-        # Fit PCA
+                 
         X_pca = self.pca.fit_transform(X_scaled)
         
-        # Store results
+                       
         self.feature_names = feature_columns
         self.explained_variance_ratio_ = self.pca.explained_variance_ratio_
         self.components_ = self.pca.components_
         
-        # Create DataFrames
+                           
         pca_df = pd.DataFrame(
             X_pca,
             columns=[f'PC{i+1}' for i in range(self.n_components)],
             index=X.index
         )
         
-        # Add metadata
+                      
         metadata_columns = ['monitoring_time', 'station_name', 'province', 'watershed', 'water_quality_grade']
         available_metadata = [col for col in metadata_columns if col in df.columns]
         
         for col in available_metadata:
             pca_df[col] = df.loc[X.index, col].values
         
-        # Components DataFrame
+                              
         components_df = pd.DataFrame(
             self.components_,
             columns=feature_columns,
@@ -92,10 +92,10 @@ class WaterQualityPCA:
             pc_name = f'PC{i+1}'
             explained_var = self.explained_variance_ratio_[i]
             
-            # Absolute component values as importance
+                                                     
             importance = np.abs(self.components_[i])
             
-            # Normalize by explained variance
+                                             
             weighted_importance = importance * explained_var
             
             importance_df[pc_name] = pd.Series(
@@ -103,7 +103,7 @@ class WaterQualityPCA:
                 index=self.feature_names
             )
         
-        # Sort by total importance
+                                  
         importance_df['total_importance'] = importance_df.sum(axis=1)
         importance_df = importance_df.sort_values('total_importance', ascending=False)
         
@@ -115,7 +115,7 @@ class WaterQualityPCA:
         if self.explained_variance_ratio_ is None:
             raise ValueError("PCA not fitted yet")
         
-        # Cumulative explained variance
+                                       
         cumsum = np.cumsum(self.explained_variance_ratio_)
         
         fig = make_subplots(
@@ -124,7 +124,7 @@ class WaterQualityPCA:
             specs=[[{"secondary_y": False}, {"secondary_y": False}]]
         )
         
-        # Individual explained variance
+                                       
         fig.add_trace(
             go.Bar(
                 x=[f'PC{i+1}' for i in range(len(self.explained_variance_ratio_))],
@@ -135,7 +135,7 @@ class WaterQualityPCA:
             row=1, col=1
         )
         
-        # Cumulative explained variance
+                                       
         fig.add_trace(
             go.Scatter(
                 x=[f'PC{i+1}' for i in range(len(cumsum))],
@@ -169,18 +169,18 @@ class WaterQualityPCA:
         pc1_name = f'PC{pc1}'
         pc2_name = f'PC{pc2}'
         
-        # Get top features for this PC pair
+                                           
         pc1_loadings = np.abs(components_df.loc[pc1_name])
         pc2_loadings = np.abs(components_df.loc[pc2_name])
         
-        # Combined importance
+                             
         combined_importance = np.sqrt(pc1_loadings**2 + pc2_loadings**2)
         top_features = combined_importance.nlargest(max_features).index.tolist()
         
-        # Create scatter plot for scores
+                                        
         fig = go.Figure()
         
-        # Color by water quality grade if available
+                                                   
         if 'water_quality_grade' in pca_df.columns:
             grades = pca_df['water_quality_grade'].fillna('Unknown')
             colors = px.colors.qualitative.Set1[:len(grades.unique())]
@@ -222,10 +222,10 @@ class WaterQualityPCA:
                 )
             )
         
-        # Add loading vectors
+                             
         for feature in top_features:
             x0, y0 = 0, 0
-            x1 = components_df.loc[pc1_name, feature] * 3  # Scale for visibility
+            x1 = components_df.loc[pc1_name, feature] * 3                        
             y1 = components_df.loc[pc2_name, feature] * 3
             
             fig.add_trace(
@@ -244,7 +244,7 @@ class WaterQualityPCA:
                 )
             )
             
-            # Add feature labels
+                                
             fig.add_annotation(
                 x=x1,
                 y=y1,
@@ -268,19 +268,19 @@ class WaterQualityPCA:
     def cluster_analysis(self, pca_df: pd.DataFrame, n_clusters: int = 5) -> pd.DataFrame:
         """Perform clustering on PCA-transformed data"""
         
-        # Use first few PCs for clustering
+                                          
         pca_features = [col for col in pca_df.columns if col.startswith('PC')]
         X_pca = pca_df[pca_features].values
         
-        # K-means clustering
+                            
         kmeans = KMeans(n_clusters=n_clusters, random_state=self.random_state)
         clusters = kmeans.fit_predict(X_pca)
         
-        # Add cluster labels
+                            
         pca_df_clustered = pca_df.copy()
         pca_df_clustered['cluster'] = clusters
         
-        # Analyze cluster characteristics
+                                         
         cluster_summary = pca_df_clustered.groupby('cluster')[pca_features].mean()
         
         logger.info(f"Clustering completed. {n_clusters} clusters identified")
@@ -301,7 +301,7 @@ class WaterQualityDimensionalityReduction:
         
         results = {}
         
-        # PCA Analysis
+                      
         logger.info("Running PCA analysis...")
         pca_df, components_df = self.pca_analyzer.fit_transform(df, feature_columns)
         results['pca'] = {
@@ -310,7 +310,7 @@ class WaterQualityDimensionalityReduction:
             'explained_variance_ratio': self.pca_analyzer.explained_variance_ratio_
         }
         
-        # t-SNE Analysis
+                        
         logger.info("Running t-SNE analysis...")
         X_scaled = self.pca_analyzer.scaler.transform(df[feature_columns].dropna())
         self.tsne = TSNE(n_components=2, random_state=self.random_state, perplexity=30)
@@ -322,7 +322,7 @@ class WaterQualityDimensionalityReduction:
             index=df[feature_columns].dropna().index
         )
         
-        # Add metadata
+                      
         metadata_columns = ['monitoring_time', 'station_name', 'province', 'watershed']
         available_metadata = [col for col in metadata_columns if col in df.columns]
         
@@ -331,7 +331,7 @@ class WaterQualityDimensionalityReduction:
         
         results['tsne'] = {'data': tsne_df}
         
-        # UMAP Analysis
+                       
         logger.info("Running UMAP analysis...")
         self.umap_reducer = umap.UMAP(n_components=2, random_state=self.random_state)
         umap_results = self.umap_reducer.fit_transform(X_scaled)
@@ -342,7 +342,7 @@ class WaterQualityDimensionalityReduction:
             index=df[feature_columns].dropna().index
         )
         
-        # Add metadata
+                      
         for col in available_metadata:
             umap_df[col] = df.loc[umap_df.index, col].values
         
@@ -360,10 +360,10 @@ class WaterQualityDimensionalityReduction:
                    [{"type": "scatter"}, {"type": "scatter"}]]
         )
         
-        # PCA plots
+                   
         pca_df = results['pca']['data']
         
-        # PC1 vs PC2
+                    
         fig.add_trace(
             go.Scatter(
                 x=pca_df['PC1'],
@@ -377,7 +377,7 @@ class WaterQualityDimensionalityReduction:
             row=1, col=1
         )
         
-        # PC3 vs PC4
+                    
         if 'PC3' in pca_df.columns and 'PC4' in pca_df.columns:
             fig.add_trace(
                 go.Scatter(
@@ -392,7 +392,7 @@ class WaterQualityDimensionalityReduction:
                 row=1, col=2
             )
         
-        # t-SNE plot
+                    
         tsne_df = results['tsne']['data']
         fig.add_trace(
             go.Scatter(
@@ -407,7 +407,7 @@ class WaterQualityDimensionalityReduction:
             row=2, col=1
         )
         
-        # UMAP plot
+                   
         umap_df = results['umap']['data']
         fig.add_trace(
             go.Scatter(
@@ -433,36 +433,36 @@ class WaterQualityDimensionalityReduction:
 
 def main():
     """Example usage"""
-    # Load processed data
+                         
     df = pd.read_parquet("data/processed_water_quality.parquet")
     
-    # Define feature columns
+                            
     feature_columns = [
         'temperature', 'ph', 'dissolved_oxygen', 'conductivity', 'turbidity',
         'permanganate_index', 'ammonia_nitrogen', 'total_phosphorus', 'total_nitrogen',
         'chlorophyll_a', 'algae_density'
     ]
     
-    # Filter available features
+                               
     available_features = [col for col in feature_columns if col in df.columns]
     
-    # Run comprehensive analysis
+                                
     analyzer = WaterQualityDimensionalityReduction()
     results = analyzer.run_comprehensive_analysis(df, available_features)
     
-    # Create visualizations
+                           
     pca_analyzer = WaterQualityPCA()
     pca_df, components_df = pca_analyzer.fit_transform(df, available_features)
     
-    # Plot explained variance
+                             
     var_plot = pca_analyzer.plot_explained_variance()
     var_plot.show()
     
-    # Plot biplot
+                 
     biplot = pca_analyzer.plot_biplot(pca_df, components_df)
     biplot.show()
     
-    # Plot comparison
+                     
     comparison_plot = analyzer.plot_comparison(results)
     comparison_plot.show()
     

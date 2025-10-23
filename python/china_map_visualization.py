@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 中国地图污染可视化系统
 - 使用Folium创建交互式地图
@@ -34,7 +34,7 @@ except ImportError:
     PLOTLY_AVAILABLE = False
     print("Plotly not available, install with: pip install plotly")
 
-# 配置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class ChinaMapVisualizer:
     def __init__(self, db_url: str):
         self.db_url = db_url
         
-        # 中国各省市坐标
+                 
         self.province_coordinates = {
             '北京': {'lat': 39.9042, 'lon': 116.4074, 'code': '110000'},
             '天津': {'lat': 39.3434, 'lon': 117.3616, 'code': '120000'},
@@ -79,17 +79,17 @@ class ChinaMapVisualizer:
             '新疆': {'lat': 43.7928, 'lon': 87.6177, 'code': '650000'}
         }
         
-        # 污染等级颜色
+                
         self.pollution_colors = {
-            'excellent': '#00E400',    # 优秀 - 绿色
-            'good': '#FFFF00',         # 良好 - 黄色
-            'light': '#FF7E00',        # 轻度污染 - 橙色
-            'moderate': '#FF0000',     # 中度污染 - 红色
-            'heavy': '#8F3F97',        # 重度污染 - 紫色
-            'severe': '#7E0023'        # 严重污染 - 深红色
+            'excellent': '#00E400',             
+            'good': '#FFFF00',                  
+            'light': '#FF7E00',                   
+            'moderate': '#FF0000',                
+            'heavy': '#8F3F97',                   
+            'severe': '#7E0023'                    
         }
         
-        # 参数阈值
+              
         self.parameter_thresholds = {
             'ph': {
                 'excellent': (6.5, 8.5),
@@ -130,7 +130,7 @@ class ChinaMapVisualizer:
         try:
             conn = psycopg2.connect(self.db_url)
             
-            # 根据参数选择正确的列名
+                         
             column_mapping = {
                 'ph': 'ph',
                 'temperature': 'temperature',
@@ -159,18 +159,18 @@ class ChinaMapVisualizer:
                 HAVING COUNT(*) > 0
             """
             
-            # 获取最近7天的数据
+                       
             start_date = datetime.now() - timedelta(days=7)
             df = pd.read_sql_query(query, conn, params=[start_date])
             conn.close()
             
-            # 处理数据
+                  
             result = {}
             for _, row in df.iterrows():
                 station_name = row['station_name']
                 avg_value = row['avg_value']
                 
-                # 提取省份信息
+                        
                 province = self.extract_province_from_station(station_name)
                 if province and province in self.province_coordinates:
                     if province not in result:
@@ -208,7 +208,7 @@ class ChinaMapVisualizer:
             if min_val <= value <= max_val:
                 return level
         
-        return 'severe'  # 默认严重污染
+        return 'severe'          
     
     def create_folium_map(self, parameter: str, output_file: str = 'china_pollution_map.html') -> str:
         """创建Folium交互式地图"""
@@ -216,17 +216,17 @@ class ChinaMapVisualizer:
             return "Folium not available"
         
         try:
-            # 获取数据
+                  
             data = self.get_latest_data(parameter)
             
-            # 创建地图
+                  
             m = folium.Map(
-                location=[35.8617, 104.1954],  # 中国中心
+                location=[35.8617, 104.1954],        
                 zoom_start=4,
                 tiles='OpenStreetMap'
             )
             
-            # 添加标题
+                  
             title_html = f'''
                 <h3 align="center" style="font-size:20px">
                 <b>中国{parameter.upper()}污染分布图</b>
@@ -236,13 +236,13 @@ class ChinaMapVisualizer:
             '''
             m.get_root().html.add_child(folium.Element(title_html))
             
-            # 添加数据点
+                   
             for province, info in data.items():
                 coords = self.province_coordinates[province]
                 pollution_level = self.get_pollution_level(parameter, info['avg_value'])
                 color = self.pollution_colors.get(pollution_level, '#808080')
                 
-                # 创建弹出信息
+                        
                 popup_text = f'''
                 <b>{province}</b><br>
                 参数: {parameter}<br>
@@ -262,7 +262,7 @@ class ChinaMapVisualizer:
                     fillOpacity=0.8
                 ).add_to(m)
             
-            # 添加图例
+                  
             legend_html = '''
                 <div style="position: fixed; 
                             bottom: 50px; left: 50px; width: 200px; height: 150px; 
@@ -279,7 +279,7 @@ class ChinaMapVisualizer:
             '''
             m.get_root().html.add_child(folium.Element(legend_html))
             
-            # 保存地图
+                  
             m.save(output_file)
             logger.info(f"Map saved to {output_file}")
             
@@ -295,10 +295,10 @@ class ChinaMapVisualizer:
             return {'error': 'Plotly not available'}
         
         try:
-            # 获取数据
+                  
             data = self.get_latest_data(parameter)
             
-            # 准备数据
+                  
             lats = []
             lons = []
             values = []
@@ -322,7 +322,7 @@ class ChinaMapVisualizer:
                 text += f'监测站: {len(info["stations"])}'
                 texts.append(text)
             
-            # 创建散点图
+                   
             fig = go.Figure()
             
             fig.add_trace(go.Scattermapbox(
@@ -339,7 +339,7 @@ class ChinaMapVisualizer:
                 name='监测点'
             ))
             
-            # 设置地图样式
+                    
             fig.update_layout(
                 title=f'中国{parameter.upper()}污染分布图',
                 mapbox=dict(
@@ -351,7 +351,7 @@ class ChinaMapVisualizer:
                 showlegend=False
             )
             
-            # 转换为JSON
+                     
             map_json = fig.to_json()
             
             return {
@@ -371,13 +371,13 @@ class ChinaMapVisualizer:
         try:
             summary = {}
             
-            # 获取各参数的最新数据
+                        
             parameters = ['ph', 'dissolved_oxygen', 'ammonia_nitrogen', 'total_phosphorus']
             
             for param in parameters:
                 data = self.get_latest_data(param)
                 
-                # 统计污染等级
+                        
                 pollution_stats = {
                     'excellent': 0,
                     'good': 0,
@@ -444,17 +444,17 @@ class ChinaMapVisualizer:
     def generate_dashboard_data(self) -> Dict:
         """生成仪表盘数据"""
         try:
-            # 创建地图数据
+                    
             map_data = {}
             parameters = ['ph', 'dissolved_oxygen', 'ammonia_nitrogen', 'total_phosphorus']
             
             for param in parameters:
                 map_data[param] = self.create_plotly_map(param)
             
-            # 创建汇总报告
+                    
             summary = self.create_pollution_summary()
             
-            # 生成统计图表数据
+                      
             charts_data = self.generate_charts_data()
             
             return {
@@ -474,13 +474,13 @@ class ChinaMapVisualizer:
         try:
             charts = {}
             
-            # 获取时间序列数据
+                      
             conn = psycopg2.connect(self.db_url)
             
-            # 各参数趋势图
+                    
             parameters = ['ph', 'dissolved_oxygen', 'ammonia_nitrogen', 'total_phosphorus']
             
-            # 列名映射
+                  
             column_mapping = {
                 'ph': 'ph',
                 'dissolved_oxygen': 'dissolved_oxygen',

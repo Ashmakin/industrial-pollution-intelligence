@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 复杂中国地图轮廓图生成器
 使用复杂边界数据生成真实的中国省份轮廓图
@@ -14,14 +14,14 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional
 import os
 
-# 设置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class ComplexChinaMapVisualizer:
     def __init__(self, db_url: str):
         self.db_url = db_url
-        # 复杂边界数据
+                
         self.china_boundaries = self._get_complex_china_boundaries()
     
     def _get_complex_china_boundaries(self) -> Dict:
@@ -29,7 +29,7 @@ class ComplexChinaMapVisualizer:
         return {
             "type": "FeatureCollection",
             "features": [
-                # 北京 - 复杂边界
+                           
                 {
                     "type": "Feature",
                     "properties": {"name": "北京", "code": "110000"},
@@ -42,7 +42,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 天津
+                    
                 {
                     "type": "Feature", 
                     "properties": {"name": "天津", "code": "120000"},
@@ -54,7 +54,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 河北 - 复杂边界
+                           
                 {
                     "type": "Feature",
                     "properties": {"name": "河北", "code": "130000"},
@@ -68,7 +68,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 山西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "山西", "code": "140000"},
@@ -81,7 +81,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 内蒙古 - 复杂形状
+                            
                 {
                     "type": "Feature",
                     "properties": {"name": "内蒙古", "code": "150000"},
@@ -95,7 +95,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 辽宁
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "辽宁", "code": "210000"},
@@ -108,7 +108,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 吉林
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "吉林", "code": "220000"},
@@ -121,7 +121,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 黑龙江
+                     
                 {
                     "type": "Feature",
                     "properties": {"name": "黑龙江", "code": "230000"},
@@ -134,7 +134,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 上海
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "上海", "code": "310000"},
@@ -147,7 +147,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 江苏
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "江苏", "code": "320000"},
@@ -159,7 +159,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 浙江
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "浙江", "code": "330000"},
@@ -171,7 +171,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 安徽
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "安徽", "code": "340000"},
@@ -184,7 +184,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 福建
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "福建", "code": "350000"},
@@ -197,7 +197,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 江西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "江西", "code": "360000"},
@@ -210,7 +210,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 山东
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "山东", "code": "370000"},
@@ -223,7 +223,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 河南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "河南", "code": "410000"},
@@ -236,7 +236,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 湖北
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "湖北", "code": "420000"},
@@ -249,7 +249,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 湖南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "湖南", "code": "430000"},
@@ -262,7 +262,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 广东
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "广东", "code": "440000"},
@@ -275,7 +275,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 广西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "广西", "code": "450000"},
@@ -288,7 +288,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 海南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "海南", "code": "460000"},
@@ -301,7 +301,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 重庆
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "重庆", "code": "500000"},
@@ -314,7 +314,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 四川
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "四川", "code": "510000"},
@@ -327,7 +327,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 贵州
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "贵州", "code": "520000"},
@@ -339,7 +339,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 云南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "云南", "code": "530000"},
@@ -351,7 +351,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 西藏
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "西藏", "code": "540000"},
@@ -364,7 +364,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 陕西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "陕西", "code": "610000"},
@@ -376,7 +376,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 甘肃
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "甘肃", "code": "620000"},
@@ -389,7 +389,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 青海
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "青海", "code": "630000"},
@@ -402,7 +402,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 宁夏
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "宁夏", "code": "640000"},
@@ -414,7 +414,7 @@ class ComplexChinaMapVisualizer:
                         ]]
                     }
                 },
-                # 新疆
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "新疆", "code": "650000"},
@@ -436,7 +436,7 @@ class ComplexChinaMapVisualizer:
             conn = psycopg2.connect(self.db_url)
             cursor = conn.cursor(cursor_factory=RealDictCursor)
             
-            # 获取每个省份的最新数据
+                         
             query = f"""
                 SELECT province, AVG({parameter}) as avg_value
                 FROM water_quality_data 
@@ -468,13 +468,13 @@ class ComplexChinaMapVisualizer:
         """根据参数值计算污染等级和颜色"""
         if parameter == 'ph':
             if 6.5 <= value <= 8.5:
-                return 'excellent', '#2E8B57'  # 优秀 - 深绿色
+                return 'excellent', '#2E8B57'            
             elif 6.0 <= value <= 9.0:
-                return 'good', '#90EE90'       # 良好 - 浅绿色
+                return 'good', '#90EE90'                 
             elif 5.5 <= value <= 9.5:
-                return 'light', '#FFD700'      # 轻度污染 - 金色
+                return 'light', '#FFD700'                 
             else:
-                return 'moderate', '#FFA500'   # 中度污染 - 橙色
+                return 'moderate', '#FFA500'              
         
         elif parameter == 'dissolved_oxygen':
             if value >= 7.5:
@@ -496,7 +496,7 @@ class ComplexChinaMapVisualizer:
             elif value <= 5.0:
                 return 'moderate', '#FFA500'
             else:
-                return 'heavy', '#FF4500'      # 重度污染 - 橙红色
+                return 'heavy', '#FF4500'                  
         
         elif parameter == 'total_phosphorus':
             if value <= 0.1:
@@ -509,21 +509,21 @@ class ComplexChinaMapVisualizer:
                 return 'moderate', '#FFA500'
         
         else:
-            return 'unknown', '#808080'        # 未知 - 灰色
+            return 'unknown', '#808080'                 
     
     def create_choropleth_map_data(self, parameter: str) -> Dict:
         """创建轮廓图数据"""
         try:
-            # 获取最新数据
+                    
             data = self.get_latest_data(parameter)
             
-            # 更新GeoJSON数据
+                         
             features = []
             for feature in self.china_boundaries['features']:
                 province_name = feature['properties']['name']
                 province_code = feature['properties']['code']
                 
-                # 获取该省份的数据
+                          
                 value = data.get(province_name, None)
                 
                 if value is not None:
@@ -533,7 +533,7 @@ class ComplexChinaMapVisualizer:
                     pollution_level = 'unknown'
                     color = '#808080'
                 
-                # 创建新的feature
+                             
                 new_feature = {
                     "type": "Feature",
                     "properties": {
@@ -547,7 +547,7 @@ class ComplexChinaMapVisualizer:
                 }
                 features.append(new_feature)
             
-            # 创建地图配置
+                    
             map_config = {
                 "map_type": "choropleth",
                 "parameter": parameter,

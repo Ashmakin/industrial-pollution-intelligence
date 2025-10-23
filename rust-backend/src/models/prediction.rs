@@ -6,8 +6,8 @@ use uuid::Uuid;
 pub struct ForecastRequest {
     pub station_name: Option<String>,
     pub parameters: Vec<String>,
-    pub forecast_horizon: u32, // hours
-    pub model_type: String,    // "lstm", "prophet", "ensemble"
+    pub forecast_horizon: u32, 
+    pub model_type: String,    
     pub include_confidence_interval: bool,
 }
 
@@ -42,7 +42,7 @@ pub struct PredictionPoint {
     pub predicted_value: f64,
     pub confidence_interval_lower: Option<f64>,
     pub confidence_interval_upper: Option<f64>,
-    pub confidence_level: Option<f64>, // 0.95 for 95% CI
+    pub confidence_level: Option<f64>, 
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -139,14 +139,14 @@ pub struct ForecastComparison {
 pub struct ModelComparison {
     pub model_type: String,
     pub accuracy_metrics: ModelMetrics,
-    pub computational_cost: f64, // seconds
-    pub memory_usage: f64,       // MB
-    pub interpretability_score: f64, // 0-1 scale
+    pub computational_cost: f64, 
+    pub memory_usage: f64,       
+    pub interpretability_score: f64, 
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ComparisonMetrics {
-    pub performance_ranking: Vec<(String, f64)>, // model_type -> composite_score
+    pub performance_ranking: Vec<(String, f64)>, 
     pub statistical_significance: Vec<StatisticalTest>,
     pub practical_significance: Vec<String>,
 }
@@ -166,8 +166,8 @@ pub struct PredictionAlert {
     pub id: Uuid,
     pub station_name: String,
     pub parameter: String,
-    pub alert_type: String, // "threshold_exceedance", "trend_change", "model_drift"
-    pub severity: String,   // "low", "medium", "high", "critical"
+    pub alert_type: String, 
+    pub severity: String,   
     pub predicted_value: f64,
     pub threshold: f64,
     pub confidence_interval: (f64, f64),
@@ -181,7 +181,7 @@ pub struct ModelTrainingJob {
     pub model_type: String,
     pub parameters: Vec<String>,
     pub training_data_range: (DateTime<Utc>, DateTime<Utc>),
-    pub status: String, // "pending", "running", "completed", "failed"
+    pub status: String, 
     pub progress_percentage: u32,
     pub estimated_completion: Option<DateTime<Utc>>,
     pub error_message: Option<String>,

@@ -105,7 +105,7 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
+        {}
         <div className="mb-12">
           <div className="flex items-center space-x-4 mb-4">
             <div className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
@@ -120,7 +120,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* 系统状态卡片 */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <div className="group bg-white/80 backdrop-blur-sm overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border border-gray-100/50 hover:-translate-y-1">
             <div className="p-6">
@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* 主要功能模块 */}
+        {}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           <div className="group bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border border-gray-100/50 hover:-translate-y-1">
             <div className="p-6">
@@ -356,7 +356,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* 快速操作 */}
+        {}
         <div className="bg-white/80 backdrop-blur-sm shadow-lg rounded-2xl border border-gray-100/50">
           <div className="p-8">
             <div className="flex items-center space-x-3 mb-8">

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 更新数据库表结构
 添加数据哈希字段用于去重
@@ -8,7 +8,7 @@ import psycopg2
 import logging
 from typing import Optional
 
-# 配置日志
+      
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def update_database_schema(db_url: str) -> bool:
         conn = psycopg2.connect(db_url)
         cursor = conn.cursor()
         
-        # 检查表是否存在
+                 
         cursor.execute("""
             SELECT EXISTS (
                 SELECT FROM information_schema.tables 
@@ -32,7 +32,7 @@ def update_database_schema(db_url: str) -> bool:
         if not table_exists:
             logger.info("Creating water_quality_data table...")
             
-            # 创建新表
+                  
             cursor.execute("""
                 CREATE TABLE water_quality_data (
                     id SERIAL PRIMARY KEY,
@@ -59,7 +59,7 @@ def update_database_schema(db_url: str) -> bool:
                 );
             """)
             
-            # 创建索引
+                  
             cursor.execute("CREATE INDEX idx_water_quality_province ON water_quality_data(province);")
             cursor.execute("CREATE INDEX idx_water_quality_basin ON water_quality_data(basin);")
             cursor.execute("CREATE INDEX idx_water_quality_station ON water_quality_data(station_name);")
@@ -71,7 +71,7 @@ def update_database_schema(db_url: str) -> bool:
         else:
             logger.info("Table exists, checking for missing columns...")
             
-            # 检查并添加缺失的列
+                       
             columns_to_add = [
                 ('basin', 'VARCHAR(100)'),
                 ('station_name', 'VARCHAR(200)'),
@@ -99,7 +99,7 @@ def update_database_schema(db_url: str) -> bool:
                     else:
                         logger.warning(f"Error adding column {column_name}: {e}")
             
-            # 添加唯一约束到data_hash
+                              
             try:
                 cursor.execute("ALTER TABLE water_quality_data ADD CONSTRAINT unique_data_hash UNIQUE (data_hash);")
                 logger.info("Added unique constraint to data_hash")
@@ -109,7 +109,7 @@ def update_database_schema(db_url: str) -> bool:
                 else:
                     logger.warning(f"Error adding unique constraint: {e}")
             
-            # 创建索引（如果不存在）
+                         
             indexes_to_create = [
                 ("idx_water_quality_basin", "CREATE INDEX idx_water_quality_basin ON water_quality_data(basin);"),
                 ("idx_water_quality_station", "CREATE INDEX idx_water_quality_station ON water_quality_data(station_name);"),

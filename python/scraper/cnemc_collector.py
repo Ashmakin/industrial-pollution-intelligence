@@ -18,7 +18,7 @@ import json
 import time
 from pathlib import Path
 
-# Configure logging
+                   
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class CNEMCCollector:
     
     BASE_URL = "https://szzdjc.cnemc.cn:8070/GJZ/Ajax/Publish.ashx"
     
-    # Provincial Area IDs (first 2 digits + 0000)
+                                                 
     PROVINCE_CODES = {
         "110000": "北京市",
         "120000": "天津市", 
@@ -107,9 +107,9 @@ class CNEMCCollector:
             return None
             
         try:
-            # Extract numeric value from HTML spans
+                                                   
             if '<span' in value_str:
-                # Extract tooltip value if available
+                                                    
                 if '原始值：' in value_str:
                     start = value_str.find('原始值：') + 4
                     end = value_str.find('"', start)
@@ -118,7 +118,7 @@ class CNEMCCollector:
                     raw_value = value_str[start:end]
                     return float(raw_value)
                 else:
-                    # Extract displayed value
+                                             
                     start = value_str.rfind('>') + 1
                     end = value_str.rfind('<')
                     if start < end:
@@ -169,7 +169,7 @@ class CNEMCCollector:
         headers = data.get("thead", [])
         rows = data.get("tbody", [])
         
-        # Map column indices
+                            
         col_map = {}
         for i, header in enumerate(headers):
             if "省份" in header:
@@ -209,7 +209,7 @@ class CNEMCCollector:
         
         for row in rows:
             try:
-                # Extract station name from HTML
+                                                
                 station_name = row[col_map["station_name"]]
                 if '<span' in station_name:
                     start = station_name.rfind('>') + 1
@@ -217,7 +217,7 @@ class CNEMCCollector:
                     if start < end:
                         station_name = station_name[start:end]
                 
-                # Parse monitoring time
+                                       
                 time_str = row[col_map["monitoring_time"]]
                 try:
                     monitoring_time = datetime.strptime(f"2024-{time_str}", "%Y-%m-%d %H:%M")
@@ -259,13 +259,13 @@ class CNEMCCollector:
             task = self.fetch_province_data(area_id)
             tasks.append(task)
         
-        # Add delay to avoid overwhelming the API
+                                                 
         results = []
         for i, task in enumerate(asyncio.as_completed(tasks)):
             province_data = await task
             results.extend(province_data)
             
-            # Rate limiting
+                           
             if i % 5 == 0:
                 await asyncio.sleep(1)
                 
@@ -329,7 +329,7 @@ class CNEMCCollector:
         stations_data = []
         measurements_data = []
         
-        # Prepare station data
+                              
         station_map = {}
         for record in records:
             station_key = (record.station_name, record.province)
@@ -342,13 +342,13 @@ class CNEMCCollector:
                 })
                 station_map[station_key] = len(stations_data)
         
-        # Store stations
+                        
         if stations_data:
             stations_df = pd.DataFrame(stations_data)
             stations_df.to_sql('water_quality_stations', self.engine, 
                              if_exists='append', index=False, method='multi')
         
-        # Get station IDs
+                         
         station_query = """
         SELECT id, station_name, province 
         FROM water_quality_stations 
@@ -361,7 +361,7 @@ class CNEMCCollector:
             station_df['id']
         ))
         
-        # Prepare measurement data
+                                  
         for record in records:
             station_key = (record.station_name, record.province)
             station_id = station_id_map.get(station_key)
@@ -384,7 +384,7 @@ class CNEMCCollector:
                     'station_status': record.station_status
                 })
         
-        # Store measurements
+                            
         if measurements_data:
             measurements_df = pd.DataFrame(measurements_data)
             measurements_df.to_sql('water_quality_measurements', self.engine,
@@ -392,7 +392,7 @@ class CNEMCCollector:
 
 async def main():
     """Main collection function"""
-    # Database connection (adjust as needed)
+                                            
     DB_URL = "postgresql://user:password@localhost:5432/pollution_db"
     
     collector = CNEMCCollector(DB_URL)
@@ -403,7 +403,7 @@ async def main():
         records = await c.collect_all_provinces()
         logger.info(f"Collected {len(records)} water quality records")
         
-        # Store in database
+                           
         c.store_records(records)
         logger.info("Data stored successfully")
 

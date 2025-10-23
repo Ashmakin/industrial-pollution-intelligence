@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 模拟真实水质数据生成器
 - 基于真实的水质参数范围
@@ -15,7 +15,7 @@ from typing import Dict, List
 import hashlib
 import json
 
-# 配置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class RealisticDataSimulator:
     def __init__(self, db_url: str):
         self.db_url = db_url
         
-        # 中国各省市信息
+                 
         self.provinces = {
             '北京': {'lat': 39.9042, 'lon': 116.4074, 'code': '110000', 'river': '永定河', 'basin': '海河流域'},
             '天津': {'lat': 39.3434, 'lon': 117.3616, 'code': '120000', 'river': '海河', 'basin': '海河流域'},
@@ -60,7 +60,7 @@ class RealisticDataSimulator:
             '新疆': {'lat': 43.7928, 'lon': 87.6177, 'code': '650000', 'river': '塔里木河', 'basin': '内陆河流域'}
         }
         
-        # 水质参数基础范围（基于真实监测数据）
+                            
         self.parameter_ranges = {
             'ph': {
                 'base': 7.2, 'std': 0.8, 'min': 6.0, 'max': 9.0,
@@ -96,7 +96,7 @@ class RealisticDataSimulator:
             }
         }
         
-        # 流域污染系数（基于真实环境状况）
+                          
         self.basin_pollution_factors = {
             '海河流域': {'ph': 1.0, 'dissolved_oxygen': 0.9, 'ammonia_nitrogen': 1.2, 'total_phosphorus': 1.1},
             '黄河流域': {'ph': 0.95, 'dissolved_oxygen': 0.85, 'ammonia_nitrogen': 1.3, 'total_phosphorus': 1.2},
@@ -123,43 +123,43 @@ class RealisticDataSimulator:
         if parameter not in self.parameter_ranges:
             return 0.0
         
-        # 基础参数
+              
         param_config = self.parameter_ranges[parameter]
         base_value = param_config['base']
         std_value = param_config['std']
         min_value = param_config['min']
         max_value = param_config['max']
         
-        # 季节性变化
+               
         day_of_year = timestamp.timetuple().tm_yday
         seasonal_component = param_config['seasonal_amplitude'] * np.sin(2 * np.pi * day_of_year / 365)
         
-        # 日变化（小时级）
+                  
         hour_component = 0.1 * np.sin(2 * np.pi * timestamp.hour / 24)
         
-        # 长期趋势
+              
         days_since_start = (timestamp - datetime(2024, 1, 1)).days
         trend_component = param_config['trend'] * days_since_start
         
-        # 流域污染因子
+                
         basin_factor = 1.0
         if province in self.provinces:
             basin = self.provinces[province]['basin']
             if basin in self.basin_pollution_factors:
                 basin_factor = self.basin_pollution_factors[basin].get(parameter, 1.0)
         
-        # 随机噪声
+              
         noise = np.random.normal(0, std_value * base_noise)
         
-        # 异常值（5%概率）
+                   
         if np.random.random() < 0.05:
-            noise *= 3  # 异常值
+            noise *= 3       
         
-        # 计算最终值
+               
         final_value = (base_value + seasonal_component + hour_component + 
                       trend_component + noise) * basin_factor
         
-        # 确保在合理范围内
+                  
         final_value = np.clip(final_value, min_value, max_value)
         
         return round(final_value, 3)
@@ -175,11 +175,11 @@ class RealisticDataSimulator:
         data_points = []
         start_time = datetime.now() - timedelta(days=days)
         
-        # 生成每小时的数据
+                  
         for i in range(days * 24):
             timestamp = start_time + timedelta(hours=i)
             
-            # 为每个参数生成数据
+                       
             for parameter in self.parameter_ranges.keys():
                 value = self.generate_parameter_value(parameter, province, timestamp)
                 data_hash = self.generate_data_hash(station_name, parameter, value, timestamp)
@@ -228,26 +228,26 @@ class RealisticDataSimulator:
     def calculate_water_quality_grade(self, ph: float, do: float, nh3: float, tp: float) -> int:
         """计算水质等级"""
         if ph is None or do is None or nh3 is None or tp is None:
-            return 3  # 默认III类
+            return 3          
         
-        # 基于地表水环境质量标准
+                     
         if ph >= 6.0 and ph <= 9.0 and do >= 5.0 and nh3 <= 1.0 and tp <= 0.2:
-            return 1  # I类
+            return 1      
         elif ph >= 6.0 and ph <= 9.0 and do >= 3.0 and nh3 <= 1.5 and tp <= 0.3:
-            return 2  # II类
+            return 2       
         elif ph >= 6.0 and ph <= 9.0 and do >= 2.0 and nh3 <= 2.0 and tp <= 0.4:
-            return 3  # III类
+            return 3        
         elif ph >= 6.0 and ph <= 9.0 and do >= 2.0 and nh3 <= 2.0 and tp <= 0.4:
-            return 4  # IV类
+            return 4       
         else:
-            return 5  # V类
+            return 5      
     
     def calculate_pollution_index(self, ph: float, do: float, nh3: float, tp: float, temp: float) -> float:
         """计算污染指数"""
         if ph is None or do is None or nh3 is None or tp is None:
             return 1.0
         
-        # 简化的污染指数计算
+                   
         ph_factor = 1.0 if 6.5 <= ph <= 8.5 else 1.5
         do_factor = 1.0 if do >= 5.0 else 2.0
         nh3_factor = 1.0 + nh3 * 0.5
@@ -264,7 +264,7 @@ class RealisticDataSimulator:
             conn = psycopg2.connect(self.db_url)
             cursor = conn.cursor()
             
-            # 批量插入数据
+                    
             insert_query = """
                 INSERT INTO water_quality_data 
                 (station_name, station_code, province, watershed, monitoring_time, 
@@ -274,7 +274,7 @@ class RealisticDataSimulator:
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
             
-            # 按时间戳分组数据
+                      
             grouped_data = {}
             for point in data_points:
                 key = (point['station_name'], point['measurement_time'])
@@ -291,7 +291,7 @@ class RealisticDataSimulator:
             
             data_tuples = []
             for key, data in grouped_data.items():
-                # 提取参数值，如果不存在则设为NULL
+                                    
                 temp = data['parameters'].get('temperature')
                 ph = data['parameters'].get('ph')
                 do = data['parameters'].get('dissolved_oxygen')
@@ -304,7 +304,7 @@ class RealisticDataSimulator:
                 chla = data['parameters'].get('chlorophyll_a')
                 algae = data['parameters'].get('algae_density')
                 
-                # 计算水质等级和污染指数
+                             
                 wq_grade = self.calculate_water_quality_grade(ph, do, nh3, tp)
                 pollution_idx = self.calculate_pollution_index(ph, do, nh3, tp, temp)
                 
@@ -355,10 +355,10 @@ class RealisticDataSimulator:
         for province in self.provinces.keys():
             logger.info(f"Generating data for {province}...")
             
-            # 生成数据
+                  
             data_points = self.generate_station_data(province, days)
             
-            # 存储数据
+                  
             inserted_count = self.store_data_to_db(data_points)
             
             results[province] = inserted_count
@@ -378,11 +378,11 @@ class RealisticDataSimulator:
         
         while True:
             try:
-                # 生成最新4小时的数据
+                            
                 logger.info("Updating data...")
-                results = self.generate_all_data(days=1)  # 生成1天的数据
+                results = self.generate_all_data(days=1)           
                 
-                # 记录更新结果
+                        
                 summary = {
                     'timestamp': datetime.now().isoformat(),
                     'update_interval_hours': update_interval_hours,
@@ -395,7 +395,7 @@ class RealisticDataSimulator:
                 
                 logger.info(f"Data update completed. Next update in {update_interval_hours} hours.")
                 
-                # 等待下次更新
+                        
                 time.sleep(update_interval_hours * 3600)
                 
             except KeyboardInterrupt:
@@ -403,7 +403,7 @@ class RealisticDataSimulator:
                 break
             except Exception as e:
                 logger.error(f"Error in continuous update: {e}")
-                time.sleep(300)  # 错误后等待5分钟
+                time.sleep(300)            
 
 def main():
     """主函数"""
@@ -429,7 +429,7 @@ def main():
         else:
             print("Usage: python simulate_realistic_data.py [generate|continuous] [days|interval]")
     else:
-        # 默认生成30天数据
+                   
         results = simulator.generate_all_data(30)
         print(json.dumps(results, ensure_ascii=False, indent=2))
 

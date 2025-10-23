@@ -8,7 +8,7 @@ import { MetricCard } from './ui/MetricCard';
 
 interface ChoroplethMapData {
   map_type: string;
-  geojson_data: any; // expect a valid GeoJSON FeatureCollection
+  geojson_data: any; 
   map_config: any;
   data_points: number;
   parameter: string;
@@ -21,7 +21,7 @@ const ChinaMap: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // containerRef is used for responsive width measurement
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -54,34 +54,34 @@ const ChinaMap: React.FC = () => {
     }
   };
 
-  // Fetch when parameter changes
+  
   useEffect(() => {
     fetchMapData(selectedParameter);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [selectedParameter]);
 
-  // Helper: safe number formatting
+  
   const safeNumber = (v: any) => (Number.isFinite(v) ? Number(v) : null);
   const fmt = (v: any, digits = 3) => {
     const n = safeNumber(v);
     return n === null ? '无数据' : n.toFixed(digits);
   };
 
-  // Render map whenever data changes
+  
   useEffect(() => {
     if (!mapData || !svgRef.current || !containerRef.current) return;
 
     const svgEl = svgRef.current;
     const containerEl = containerRef.current;
 
-    // Clear previous render
+    
     svgEl.innerHTML = '';
 
-    // Fixed dimensions to display complete China map
+    
     const width = 1000;
     const height = 800;
 
-    // Set SVG size & viewBox to be responsive
+    
     svgEl.setAttribute('width', String(width));
     svgEl.setAttribute('height', String(height));
     svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
@@ -89,7 +89,7 @@ const ChinaMap: React.FC = () => {
 
     const svg = d3.select(svgEl);
 
-    // Remove old tooltip (if any), then create a new one
+    
     d3.select('body').selectAll('div.map-tooltip').remove();
     const tooltip = d3
       .select('body')
@@ -105,19 +105,19 @@ const ChinaMap: React.FC = () => {
       .style('font-size', '12px')
       .style('z-index', '1000');
 
-    // Create a projection; Mercator is sufficient for China outline
+    
     const projection = d3
       .geoMercator()
-      .scale(width * 0.8) // Adjusted scale for complete China display
+      .scale(width * 0.8) 
       .center([104.1954, 35.8617])
       .translate([width / 2, height / 2]);
 
     const path = d3.geoPath().projection(projection);
 
-    // Layer group for pan/zoom
+    
     const g = svg.append('g').attr('class', 'map-layer');
 
-    // Draw features
+    
     const features = mapData?.geojson_data?.features ?? [];
 
     g.selectAll('path.region')
@@ -151,7 +151,7 @@ const ChinaMap: React.FC = () => {
         tooltip.transition().duration(200).style('opacity', 0);
       });
 
-    // Zoom & pan
+    
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([1, 8])
@@ -161,7 +161,7 @@ const ChinaMap: React.FC = () => {
 
     svg.call(zoom as any);
 
-    // Cleanup on unmount or data change
+    
     return () => {
       tooltip.remove();
       svg.selectAll('*').remove();
@@ -231,7 +231,7 @@ const ChinaMap: React.FC = () => {
               />
             </div>
 
-            {/* Responsive SVG container */}
+            {}
             <div ref={containerRef} className="w-full flex justify-center">
               <svg
                 ref={svgRef}
@@ -241,7 +241,7 @@ const ChinaMap: React.FC = () => {
             </div>
           </Card>
 
-          {/* Legend */}
+          {}
           <Card className="p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">污染等级图例</h3>
             <div className="flex flex-wrap justify-center gap-4">

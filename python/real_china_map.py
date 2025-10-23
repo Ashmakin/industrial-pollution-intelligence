@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 真实中国地图轮廓图生成器
 使用真实的中国省份边界数据生成轮廓图
@@ -14,14 +14,14 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional
 import os
 
-# 设置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class RealChinaMapVisualizer:
     def __init__(self, db_url: str):
         self.db_url = db_url
-        # 真实的中国省份边界数据 (简化的GeoJSON格式)
+                                    
         self.china_boundaries = self._get_china_boundaries()
     
     def _get_china_boundaries(self) -> Dict:
@@ -29,7 +29,7 @@ class RealChinaMapVisualizer:
         return {
             "type": "FeatureCollection",
             "features": [
-                # 北京
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "北京", "code": "110000"},
@@ -38,7 +38,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[115.7, 40.2], [117.4, 40.2], [117.4, 39.4], [115.7, 39.4], [115.7, 40.2]]]
                     }
                 },
-                # 天津
+                    
                 {
                     "type": "Feature", 
                     "properties": {"name": "天津", "code": "120000"},
@@ -47,7 +47,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[117.0, 39.6], [118.0, 39.6], [118.0, 38.6], [117.0, 38.6], [117.0, 39.6]]]
                     }
                 },
-                # 河北
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "河北", "code": "130000"},
@@ -56,7 +56,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[113.5, 42.6], [119.8, 42.6], [119.8, 36.1], [113.5, 36.1], [113.5, 42.6]]]
                     }
                 },
-                # 山西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "山西", "code": "140000"},
@@ -65,7 +65,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[110.2, 40.7], [114.6, 40.7], [114.6, 34.6], [110.2, 34.6], [110.2, 40.7]]]
                     }
                 },
-                # 内蒙古
+                     
                 {
                     "type": "Feature",
                     "properties": {"name": "内蒙古", "code": "150000"},
@@ -74,7 +74,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[97.2, 53.3], [126.0, 53.3], [126.0, 37.2], [97.2, 37.2], [97.2, 53.3]]]
                     }
                 },
-                # 辽宁
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "辽宁", "code": "210000"},
@@ -83,7 +83,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[118.3, 43.3], [125.3, 43.3], [125.3, 38.7], [118.3, 38.7], [118.3, 43.3]]]
                     }
                 },
-                # 吉林
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "吉林", "code": "220000"},
@@ -92,7 +92,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[121.6, 46.3], [131.2, 46.3], [131.2, 40.9], [121.6, 40.9], [121.6, 46.3]]]
                     }
                 },
-                # 黑龙江
+                     
                 {
                     "type": "Feature",
                     "properties": {"name": "黑龙江", "code": "230000"},
@@ -101,7 +101,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[121.1, 53.6], [135.1, 53.6], [135.1, 43.4], [121.1, 43.4], [121.1, 53.6]]]
                     }
                 },
-                # 上海
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "上海", "code": "310000"},
@@ -110,7 +110,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[120.9, 31.9], [122.1, 31.9], [122.1, 30.7], [120.9, 30.7], [120.9, 31.9]]]
                     }
                 },
-                # 江苏
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "江苏", "code": "320000"},
@@ -119,7 +119,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[116.2, 35.1], [121.9, 35.1], [121.9, 30.8], [116.2, 30.8], [116.2, 35.1]]]
                     }
                 },
-                # 浙江
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "浙江", "code": "330000"},
@@ -128,7 +128,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[118.0, 31.4], [123.2, 31.4], [123.2, 27.0], [118.0, 27.0], [118.0, 31.4]]]
                     }
                 },
-                # 安徽
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "安徽", "code": "340000"},
@@ -137,7 +137,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[114.9, 34.7], [119.3, 34.7], [119.3, 29.4], [114.9, 29.4], [114.9, 34.7]]]
                     }
                 },
-                # 福建
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "福建", "code": "350000"},
@@ -146,7 +146,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[115.9, 28.3], [120.7, 28.3], [120.7, 23.5], [115.9, 23.5], [115.9, 28.3]]]
                     }
                 },
-                # 江西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "江西", "code": "360000"},
@@ -155,7 +155,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[113.6, 30.0], [118.5, 30.0], [118.5, 24.5], [113.6, 24.5], [113.6, 30.0]]]
                     }
                 },
-                # 山东
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "山东", "code": "370000"},
@@ -164,7 +164,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[114.5, 38.4], [122.7, 38.4], [122.7, 34.4], [114.5, 34.4], [114.5, 38.4]]]
                     }
                 },
-                # 河南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "河南", "code": "410000"},
@@ -173,7 +173,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[110.4, 36.4], [116.7, 36.4], [116.7, 31.2], [110.4, 31.2], [110.4, 36.4]]]
                     }
                 },
-                # 湖北
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "湖北", "code": "420000"},
@@ -182,7 +182,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[108.3, 33.3], [116.1, 33.3], [116.1, 29.0], [108.3, 29.0], [108.3, 33.3]]]
                     }
                 },
-                # 湖南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "湖南", "code": "430000"},
@@ -191,7 +191,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[108.8, 30.1], [114.3, 30.1], [114.3, 24.6], [108.8, 24.6], [108.8, 30.1]]]
                     }
                 },
-                # 广东
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "广东", "code": "440000"},
@@ -200,7 +200,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[109.7, 25.3], [117.3, 25.3], [117.3, 20.1], [109.7, 20.1], [109.7, 25.3]]]
                     }
                 },
-                # 广西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "广西", "code": "450000"},
@@ -209,7 +209,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[104.3, 26.4], [112.0, 26.4], [112.0, 20.9], [104.3, 20.9], [104.3, 26.4]]]
                     }
                 },
-                # 海南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "海南", "code": "460000"},
@@ -218,7 +218,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[108.6, 20.0], [111.1, 20.0], [111.1, 18.1], [108.6, 18.1], [108.6, 20.0]]]
                     }
                 },
-                # 重庆
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "重庆", "code": "500000"},
@@ -227,7 +227,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[105.3, 32.2], [110.2, 32.2], [110.2, 28.2], [105.3, 28.2], [105.3, 32.2]]]
                     }
                 },
-                # 四川
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "四川", "code": "510000"},
@@ -236,7 +236,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[97.3, 34.3], [108.5, 34.3], [108.5, 26.0], [97.3, 26.0], [97.3, 34.3]]]
                     }
                 },
-                # 贵州
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "贵州", "code": "520000"},
@@ -245,7 +245,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[103.6, 29.2], [109.6, 29.2], [109.6, 24.6], [103.6, 24.6], [103.6, 29.2]]]
                     }
                 },
-                # 云南
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "云南", "code": "530000"},
@@ -254,7 +254,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[97.5, 29.2], [106.2, 29.2], [106.2, 21.1], [97.5, 21.1], [97.5, 29.2]]]
                     }
                 },
-                # 西藏
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "西藏", "code": "540000"},
@@ -263,7 +263,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[78.4, 36.5], [99.1, 36.5], [99.1, 27.5], [78.4, 27.5], [78.4, 36.5]]]
                     }
                 },
-                # 陕西
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "陕西", "code": "610000"},
@@ -272,7 +272,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[105.5, 39.6], [111.3, 39.6], [111.3, 31.4], [105.5, 31.4], [105.5, 39.6]]]
                     }
                 },
-                # 甘肃
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "甘肃", "code": "620000"},
@@ -281,7 +281,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[92.1, 42.8], [109.0, 42.8], [109.0, 32.1], [92.1, 32.1], [92.1, 42.8]]]
                     }
                 },
-                # 青海
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "青海", "code": "630000"},
@@ -290,7 +290,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[89.4, 39.2], [103.0, 39.2], [103.0, 31.6], [89.4, 31.6], [89.4, 39.2]]]
                     }
                 },
-                # 宁夏
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "宁夏", "code": "640000"},
@@ -299,7 +299,7 @@ class RealChinaMapVisualizer:
                         "coordinates": [[[104.2, 39.4], [107.6, 39.4], [107.6, 35.2], [104.2, 35.2], [104.2, 39.4]]]
                     }
                 },
-                # 新疆
+                    
                 {
                     "type": "Feature",
                     "properties": {"name": "新疆", "code": "650000"},
@@ -317,7 +317,7 @@ class RealChinaMapVisualizer:
             conn = psycopg2.connect(self.db_url)
             cursor = conn.cursor(cursor_factory=RealDictCursor)
             
-            # 获取每个省份的最新数据
+                         
             query = f"""
                 SELECT province, AVG({parameter}) as avg_value
                 FROM water_quality_data 
@@ -349,13 +349,13 @@ class RealChinaMapVisualizer:
         """根据参数值计算污染等级和颜色"""
         if parameter == 'ph':
             if 6.5 <= value <= 8.5:
-                return 'excellent', '#2E8B57'  # 优秀 - 深绿色
+                return 'excellent', '#2E8B57'            
             elif 6.0 <= value <= 9.0:
-                return 'good', '#90EE90'       # 良好 - 浅绿色
+                return 'good', '#90EE90'                 
             elif 5.5 <= value <= 9.5:
-                return 'light', '#FFD700'      # 轻度污染 - 金色
+                return 'light', '#FFD700'                 
             else:
-                return 'moderate', '#FFA500'   # 中度污染 - 橙色
+                return 'moderate', '#FFA500'              
         
         elif parameter == 'dissolved_oxygen':
             if value >= 7.5:
@@ -377,7 +377,7 @@ class RealChinaMapVisualizer:
             elif value <= 5.0:
                 return 'moderate', '#FFA500'
             else:
-                return 'heavy', '#FF4500'      # 重度污染 - 橙红色
+                return 'heavy', '#FF4500'                  
         
         elif parameter == 'total_phosphorus':
             if value <= 0.1:
@@ -390,21 +390,21 @@ class RealChinaMapVisualizer:
                 return 'moderate', '#FFA500'
         
         else:
-            return 'unknown', '#808080'        # 未知 - 灰色
+            return 'unknown', '#808080'                 
     
     def create_choropleth_map_data(self, parameter: str) -> Dict:
         """创建轮廓图数据"""
         try:
-            # 获取最新数据
+                    
             data = self.get_latest_data(parameter)
             
-            # 更新GeoJSON数据
+                         
             features = []
             for feature in self.china_boundaries['features']:
                 province_name = feature['properties']['name']
                 province_code = feature['properties']['code']
                 
-                # 获取该省份的数据
+                          
                 value = data.get(province_name, None)
                 
                 if value is not None:
@@ -414,7 +414,7 @@ class RealChinaMapVisualizer:
                     pollution_level = 'unknown'
                     color = '#808080'
                 
-                # 创建新的feature
+                             
                 new_feature = {
                     "type": "Feature",
                     "properties": {
@@ -428,7 +428,7 @@ class RealChinaMapVisualizer:
                 }
                 features.append(new_feature)
             
-            # 创建地图配置
+                    
             map_config = {
                 "map_type": "choropleth",
                 "parameter": parameter,

@@ -53,7 +53,7 @@ pub async fn start_collection(
 ) -> Result<Json<ApiResponse<serde_json::Value>>, StatusCode> {
     println!("Starting data collection for areas: {:?}", request.areas);
     
-    // 构建Python脚本命令
+    
     let area_ids_str = if let Some(areas) = &request.areas {
         areas.join(" ")
     } else {
@@ -62,7 +62,7 @@ pub async fn start_collection(
     
     let max_records = request.max_records.unwrap_or(100);
     
-    // 启动Python数据采集脚本
+    
     let script_command = format!(
         "cd ../python && source venv/bin/activate && python3 real_cnemc_collector.py --area-ids {} --max-records {} --database-url postgres://pollution_user:pollution_pass@localhost:5432/pollution_db",
         area_ids_str, max_records
@@ -79,7 +79,7 @@ pub async fn start_collection(
                 let result_str = String::from_utf8_lossy(&output.stdout);
                 println!("Data collection completed: {}", result_str);
                 
-                // 尝试解析结果
+                
                 if let Ok(result) = serde_json::from_str::<serde_json::Value>(&result_str) {
                     Ok(Json(ApiResponse {
                         success: true,
@@ -132,7 +132,7 @@ pub async fn start_collection(
 pub async fn get_status(
     State(pool): State<PgPool>,
 ) -> Result<Json<ApiResponse<DataCollectionStatus>>, StatusCode> {
-    // 从数据库查询真实状态
+    
     match sqlx::query_as::<_, (i64, String)>(
         "SELECT COUNT(*) as total_records, 
                 STRING_AGG(DISTINCT province, ', ') as provinces 

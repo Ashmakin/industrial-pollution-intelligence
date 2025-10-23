@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 数据采集脚本 - 从CNEMC API采集实时水质数据
 """
@@ -11,7 +11,7 @@ import argparse
 from datetime import datetime
 import logging
 
-# 添加项目根目录到Python路径
+                  
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from scraper.cnemc_collector import CNEMCCollector
@@ -19,7 +19,7 @@ from processing.etl_pipeline import WaterQualityETL
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# 配置日志
+      
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -43,7 +43,7 @@ class DataCollectionRunner:
             try:
                 logger.info(f"采集区域 {area_id} 的数据...")
                 
-                # 采集数据
+                      
                 raw_data = await self.collector.collect_real_time_data(
                     area_id=area_id,
                     max_records=max_records // len(area_ids)
@@ -52,10 +52,10 @@ class DataCollectionRunner:
                 if raw_data:
                     logger.info(f"区域 {area_id} 采集到 {len(raw_data)} 条数据")
                     
-                    # 处理数据
+                          
                     processed_data = self.etl.process_data(raw_data)
                     
-                    # 存储数据
+                          
                     stored_count = await self.store_data(processed_data)
                     total_collected += stored_count
                     
@@ -86,7 +86,7 @@ class DataCollectionRunner:
             stored_count = 0
             for record in data:
                 try:
-                    # 插入水质数据
+                            
                     insert_query = """
                     INSERT INTO water_quality_measurements (
                         station_name, station_code, province, watershed,

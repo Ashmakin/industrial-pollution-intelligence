@@ -46,7 +46,7 @@ const EnhancedDataAnalysis: React.FC = () => {
   const [availableStations, setAvailableStations] = useState<Station[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 完整的中国省市列表
+  
   const cities = [
     '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江',
     '上海', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南',
@@ -54,12 +54,12 @@ const EnhancedDataAnalysis: React.FC = () => {
     '云南', '西藏', '陕西', '甘肃', '青海', '宁夏', '新疆'
   ];
 
-  // 初始化可用城市
+  
   useEffect(() => {
     setAvailableCities(cities);
   }, []);
 
-  // 当选择城市时，加载该城市的监测站
+  
   useEffect(() => {
     if (selectedCity) {
       loadStationsForCity(selectedCity);
@@ -68,12 +68,12 @@ const EnhancedDataAnalysis: React.FC = () => {
 
   const loadStationsForCity = async (city: string) => {
     try {
-      // 调用真实的API获取指定城市的监测站列表
+      
       const response = await fetch(`/api/pollution/stations?province=${encodeURIComponent(city)}`);
       if (response.ok) {
         const data = await response.json();
         if (data.success && data.data && data.data.length > 0) {
-          // 将API返回的数据转换为组件需要的格式
+          
           const stations = data.data.map((station: any) => ({
             name: station.station_name,
             basin: station.watershed || '未知流域',
@@ -82,7 +82,7 @@ const EnhancedDataAnalysis: React.FC = () => {
           setAvailableStations(stations);
         } else {
           console.error('获取监测站数据失败:', data.error || '未知错误');
-          // 临时使用测试数据
+          
           const testStations = [
             { name: '105公路桥', basin: '未知流域', area_id: '105公路桥' },
             { name: '310公路桥', basin: '未知流域', area_id: '310公路桥' },
@@ -125,7 +125,7 @@ const EnhancedDataAnalysis: React.FC = () => {
   ];
 
 
-  // 生成模拟可视化数据
+  
   const generateMockVisualizations = (analysisType: string, selectedParameters: string[]) => {
     const mockData: any = {};
     
@@ -162,7 +162,7 @@ const EnhancedDataAnalysis: React.FC = () => {
     return mockData;
   };
 
-  // 处理监测站选择变化
+  
   const handleStationChange = (station: string) => {
     setSelectedStation(station);
   };
@@ -182,7 +182,7 @@ const EnhancedDataAnalysis: React.FC = () => {
       });
 
       if (response.success && response.data) {
-        // 生成模拟可视化数据
+        
         const mockVisualizations = generateMockVisualizations(analysisType, selectedParameters);
         
         const newResult: AnalysisResult = {
@@ -219,7 +219,7 @@ const EnhancedDataAnalysis: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 标题 */}
+      {}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">数据分析</h2>
@@ -236,7 +236,7 @@ const EnhancedDataAnalysis: React.FC = () => {
         </Button>
       </div>
 
-      {/* 分析配置 */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -245,7 +245,7 @@ const EnhancedDataAnalysis: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* 分析类型 */}
+          {}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               分析类型 <span className="text-red-500">*</span>
@@ -276,11 +276,11 @@ const EnhancedDataAnalysis: React.FC = () => {
             </div>
           </div>
 
-          {/* 层级选择：城市 -> 监测站 */}
+          {}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">选择分析范围</h3>
             
-            {/* 城市选择 */}
+            {}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 选择城市 <span className="text-red-500">*</span>
@@ -308,7 +308,7 @@ const EnhancedDataAnalysis: React.FC = () => {
               </p>
             </div>
 
-            {/* 监测站选择 */}
+            {}
             {selectedCity && availableStations.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -343,7 +343,7 @@ const EnhancedDataAnalysis: React.FC = () => {
             )}
           </div>
 
-          {/* 参数选择 */}
+          {}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               选择参数 <span className="text-red-500">*</span>
@@ -372,7 +372,7 @@ const EnhancedDataAnalysis: React.FC = () => {
             </p>
           </div>
 
-          {/* 分析按钮 */}
+          {}
           <Button
             onClick={handleAnalysis}
             disabled={isAnalyzing || selectedParameters.length === 0}
@@ -388,7 +388,7 @@ const EnhancedDataAnalysis: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* 分析结果 */}
+      {}
       {analysisResults.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-gray-900">分析结果</h3>
@@ -407,7 +407,7 @@ const EnhancedDataAnalysis: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* 参数信息 */}
+                  {}
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-2">分析参数</h4>
                     <div className="flex flex-wrap gap-2">
@@ -419,7 +419,7 @@ const EnhancedDataAnalysis: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* 洞察结果 */}
+                  {}
                   {result.insights.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-gray-700 mb-2">分析洞察</h4>
@@ -434,7 +434,7 @@ const EnhancedDataAnalysis: React.FC = () => {
                     </div>
                   )}
 
-                  {/* 可视化图表 */}
+                  {}
                   {result.visualizations && Object.keys(result.visualizations).length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium text-gray-700 mb-2">可视化结果</h4>

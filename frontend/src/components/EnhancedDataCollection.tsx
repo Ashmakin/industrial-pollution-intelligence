@@ -55,7 +55,7 @@ const EnhancedDataCollection: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  // 完整的中国省市列表
+  
   const areaOptions = [
     { code: '110000', name: '北京' },
     { code: '120000', name: '天津' },
@@ -90,7 +90,7 @@ const EnhancedDataCollection: React.FC = () => {
     { code: '650000', name: '新疆' }
   ];
 
-  // 流域选项
+  
   const basinOptions = [
     { name: '海河流域', code: 'haihe' },
     { name: '黄河流域', code: 'yellow_river' },
@@ -105,7 +105,7 @@ const EnhancedDataCollection: React.FC = () => {
     { name: '其他', code: 'other' }
   ];
 
-  // 获取可用的流域列表
+  
   const fetchBasins = async () => {
     try {
       const response = await fetch('/api/basins');
@@ -118,7 +118,7 @@ const EnhancedDataCollection: React.FC = () => {
     }
   };
 
-  // 获取指定地区的监测站列表
+  
   const fetchStations = async (areaId: string) => {
     try {
       const response = await fetch(`/api/stations?area_id=${areaId}`);
@@ -172,12 +172,12 @@ const EnhancedDataCollection: React.FC = () => {
           current_area: selectedAreas.join(', ')
         }));
         
-        // 开始轮询状态
+        
         const interval = setInterval(() => {
           fetchStatus();
         }, 2000);
         
-        // 5分钟后停止轮询
+        
         setTimeout(() => {
           clearInterval(interval);
           setIsCollecting(false);
@@ -195,34 +195,34 @@ const EnhancedDataCollection: React.FC = () => {
     }
   };
 
-  // 处理地区选择变化
+  
   const handleAreaChange = (area: string) => {
     if (area && !selectedAreas.includes(area)) {
       setSelectedAreas([...selectedAreas, area]);
     }
-    // 当选择地区时，清空流域和监测站选择
+    
     setSelectedBasins([]);
     setSelectedStations([]);
     setAvailableStations([]);
   };
 
-  // 处理流域选择变化
+  
   const handleBasinChange = (basin: string) => {
     if (basin && !selectedBasins.includes(basin)) {
       setSelectedBasins([...selectedBasins, basin]);
     }
-    // 当选择流域时，清空监测站选择
+    
     setSelectedStations([]);
   };
 
-  // 处理监测站选择变化
+  
   const handleStationChange = (station: string) => {
     if (station && !selectedStations.includes(station)) {
       setSelectedStations([...selectedStations, station]);
     }
   };
 
-  // 加载指定地区的监测站
+  
   const loadStationsForArea = (areaName: string) => {
     const area = areaOptions.find(a => a.name === areaName);
     if (area) {
@@ -237,7 +237,7 @@ const EnhancedDataCollection: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // 当选择地区时，加载监测站
+  
   useEffect(() => {
     if (selectedAreas.length > 0) {
       loadStationsForArea(selectedAreas[0]);
@@ -246,7 +246,7 @@ const EnhancedDataCollection: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 标题和状态 */}
+      {}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">数据采集</h2>
@@ -274,7 +274,7 @@ const EnhancedDataCollection: React.FC = () => {
         </div>
       </div>
 
-      {/* 状态卡片 */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <MetricCard
           title="采集状态"
@@ -298,7 +298,7 @@ const EnhancedDataCollection: React.FC = () => {
         />
       </div>
 
-      {/* 配置面板 */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -307,7 +307,7 @@ const EnhancedDataCollection: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* 地区选择 - 使用勾选框 */}
+          {}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
               选择地区 <span className="text-red-500">*</span>
@@ -336,10 +336,10 @@ const EnhancedDataCollection: React.FC = () => {
             </p>
           </div>
 
-          {/* 高级设置 */}
+          {}
           {showAdvanced && (
             <>
-              {/* 流域选择 - 使用勾选框 */}
+              {}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   选择流域
@@ -368,7 +368,7 @@ const EnhancedDataCollection: React.FC = () => {
                 </p>
               </div>
 
-              {/* 监测站选择 */}
+              {}
               {availableStations.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -390,7 +390,7 @@ const EnhancedDataCollection: React.FC = () => {
                 </div>
               )}
 
-              {/* 记录数限制 */}
+              {}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   最大记录数
@@ -410,7 +410,7 @@ const EnhancedDataCollection: React.FC = () => {
             </>
           )}
 
-          {/* 操作按钮 */}
+          {}
           <div className="flex items-center space-x-4">
             <Button
               onClick={handleStartCollection}
@@ -441,7 +441,7 @@ const EnhancedDataCollection: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* 当前状态 */}
+      {}
       {status.is_running && (
         <Card>
           <CardHeader>
@@ -487,7 +487,7 @@ const EnhancedDataCollection: React.FC = () => {
         </Card>
       )}
 
-      {/* 自动采集设置 */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

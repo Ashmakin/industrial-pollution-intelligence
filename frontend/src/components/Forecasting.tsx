@@ -26,7 +26,7 @@ const Forecasting: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // 完整的中国省市列表
+  
   const cities = [
     '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江',
     '上海', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南',
@@ -72,10 +72,10 @@ const Forecasting: React.FC = () => {
   ];
 
 
-  // 根据城市过滤监测站（现在availableStations已经是过滤后的数据）
+  
   const filteredStations = availableStations;
 
-  // 当选择城市时，加载该城市的监测站
+  
   useEffect(() => {
     if (selectedCity) {
       loadStationsForCity(selectedCity);
@@ -85,14 +85,14 @@ const Forecasting: React.FC = () => {
   const loadStationsForCity = async (city: string) => {
     setLoading(true);
     try {
-      // 调用真实的API获取指定城市的监测站列表
+      
       const response = await fetch(`/api/pollution/stations?province=${encodeURIComponent(city)}`);
       console.log('API响应状态:', response.status);
       if (response.ok) {
         const data = await response.json();
         console.log('API响应数据:', data);
         if (data.success && data.data && data.data.length > 0) {
-          // 将API返回的数据转换为组件需要的格式
+          
           const stations = data.data.map((station: any) => ({
             name: station.station_name,
             basin: station.watershed || '未知流域',
@@ -249,13 +249,13 @@ const Forecasting: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* 预测图表 */}
+            {}
             <div className="lg:col-span-2">
               <h4 className="text-sm font-medium text-gray-700 mb-3">预测趋势</h4>
               {renderForecastChart(result)}
             </div>
             
-            {/* 模型性能指标 */}
+            {}
             <div className="space-y-4">
               <h4 className="text-sm font-medium text-gray-700">模型性能</h4>
               <div className="space-y-3">
@@ -284,7 +284,7 @@ const Forecasting: React.FC = () => {
             </div>
           </div>
 
-          {/* 预测洞察 */}
+          {}
           <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <h4 className="text-sm font-medium text-blue-900 mb-3 flex items-center">
               <Activity className="h-4 w-4 mr-2" />
@@ -315,7 +315,7 @@ const Forecasting: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
             <div className="p-2 bg-purple-100 rounded-lg">
@@ -329,7 +329,7 @@ const Forecasting: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* 左侧：预测配置 */}
+          {}
           <div className="lg:col-span-1">
             <Card variant="elevated" className="sticky top-8">
               <CardHeader>
@@ -339,7 +339,7 @@ const Forecasting: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* 城市选择 */}
+                {}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     选择城市
@@ -355,7 +355,7 @@ const Forecasting: React.FC = () => {
                   />
                 </div>
 
-                {/* 监测站点选择 */}
+                {}
                 {selectedCity && filteredStations.length > 0 && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -376,7 +376,7 @@ const Forecasting: React.FC = () => {
                   </div>
                 )}
 
-                {/* 预测参数 */}
+                {}
                 <Select
                   label="预测参数"
                   options={parameters.map(p => ({ value: p.value, label: p.label }))}
@@ -384,7 +384,7 @@ const Forecasting: React.FC = () => {
                   onChange={setSelectedParameter}
                 />
 
-                {/* 预测时长 */}
+                {}
                 <Select
                   label="预测时长"
                   options={horizons}
@@ -392,7 +392,7 @@ const Forecasting: React.FC = () => {
                   onChange={setSelectedHorizon}
                 />
 
-                {/* 预测模型 */}
+                {}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     预测模型
@@ -421,7 +421,7 @@ const Forecasting: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 生成预测按钮 */}
+                {}
                 <Button
                   onClick={generateNewForecast}
                   disabled={isGenerating}
@@ -436,7 +436,7 @@ const Forecasting: React.FC = () => {
             </Card>
           </div>
 
-          {/* 右侧：预测结果 */}
+          {}
           <div className="lg:col-span-3">
             {forecastResults.length === 0 ? (
               <Card variant="outlined" className="text-center py-12">

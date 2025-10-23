@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 基础样式重置 */
+
 * {
   box-sizing: border-box;
 }
@@ -19,13 +19,13 @@ body {
   line-height: 1.6;
 }
 
-/* 应用容器 */
+
 .App {
   min-height: 100vh;
   background-color: #f9fafb;
 }
 
-/* 加载动画 */
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -39,7 +39,7 @@ body {
   animation: spin 1s linear infinite;
 }
 
-/* 响应式设计 */
+
 @media (max-width: 640px) {
   .grid-cols-1 {
     grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -62,7 +62,7 @@ body {
   }
 }
 
-/* 打印样式 */
+
 @media print {
   .shadow,
   .shadow-sm,

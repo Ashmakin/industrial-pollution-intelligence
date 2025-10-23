@@ -46,47 +46,47 @@ impl<T> ApiResponse<T> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Initialize tracing
+    
     tracing_subscriber::fmt::init();
 
-    // Initialize database pool
+    
     let database_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgres://pollution_user:pollution_pass@localhost:5432/pollution_db".to_string());
     
     let pool = PgPool::connect(&database_url).await?;
 
-    // Build application routes
+    
     let app = Router::new()
-        // Health check
+        
         .route("/health", get(health_check))
         .route("/test-db", get(test_db))
         
-        // Pollution data endpoints
+        
         .route("/api/pollution/stations", get(pollution::get_stations))
         .route("/api/pollution/measurements", get(pollution::get_measurements))
         .route("/api/pollution/statistics", get(pollution::get_statistics))
         
-        // Enhanced data collection endpoints
+        
         .route("/api/data/collect", axum::routing::post(enhanced_data_collection::start_collection))
         .route("/api/data/status", axum::routing::get(enhanced_data_collection::get_status))
         .route("/api/areas", axum::routing::get(enhanced_data_collection::get_areas))
         .route("/api/basins", axum::routing::get(enhanced_data_collection::get_basins))
         .route("/api/stations", axum::routing::get(enhanced_data_collection::get_stations))
         
-        // Analysis endpoints
+        
         .route("/api/analysis/:analysis_type", axum::routing::get(api::analysis::get_analysis_results))
         
-        // Forecasting endpoints
+        
         .route("/api/forecasts", axum::routing::get(forecast::get_forecasts))
         .route("/api/forecasts/:id", axum::routing::get(forecast::get_forecast_by_id))
         .route("/api/forecast/generate", axum::routing::post(forecast::generate_forecast))
         .route("/api/forecast/list", axum::routing::get(forecast::get_forecast_list))
         
-        // Map visualization endpoints
+        
         .route("/api/map", axum::routing::get(api::map::generate_map))
         .route("/api/dashboard", axum::routing::get(api::map::generate_dashboard))
         
-        // Add middleware
+        
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
@@ -96,7 +96,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(TraceLayer::new_for_http())
         .with_state(pool);
 
-    // Start server
+    
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080").await?;
     info!("Server running on http://0.0.0.0:8080");
 

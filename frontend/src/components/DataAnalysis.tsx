@@ -67,7 +67,7 @@ const DataAnalysis: React.FC = () => {
           parameters: selectedParameters,
           timestamp: new Date().toISOString(),
           insights: result.data.insights || [],
-          metrics: result.data, // 直接使用返回的真实数据
+          metrics: result.data, 
           visualizations: result.data.visualizations || {}
         };
 
@@ -81,7 +81,7 @@ const DataAnalysis: React.FC = () => {
   };
 
   const generatePCAData = (result: AnalysisResult) => {
-    // 使用真实数据或生成模拟数据作为后备
+    
     if (result.metrics?.explained_variance_ratio && Array.isArray(result.metrics.explained_variance_ratio)) {
       return result.metrics.explained_variance_ratio.map((ratio: number, index: number) => ({
         component: `PC${index + 1}`,
@@ -90,7 +90,7 @@ const DataAnalysis: React.FC = () => {
       }));
     }
     
-    // 后备模拟数据
+    
     return [
       { component: 'PC1', variance: 45.2, cumulative: 45.2 },
       { component: 'PC2', variance: 28.7, cumulative: 73.9 },
@@ -102,7 +102,7 @@ const DataAnalysis: React.FC = () => {
   };
 
   const generateRadarData = (result: AnalysisResult) => {
-    // 使用真实数据或生成模拟数据作为后备
+    
     const paramNames = {
       'ph': 'pH值',
       'ammonia_nitrogen': '氨氮',
@@ -113,17 +113,17 @@ const DataAnalysis: React.FC = () => {
     };
 
     if (result.metrics?.components && typeof result.metrics.components === 'object') {
-      // 基于真实的主成分分析结果生成雷达图数据
+      
       const components = result.metrics.components as Record<string, string[]>;
       const radarData: Array<{parameter: string, value: number, fullMark: number}> = [];
       
-      // 遍历主成分，提取参数
+      
       Object.keys(components).forEach((pc, index) => {
         components[pc].forEach(param => {
           if (!radarData.find(item => item.parameter === paramNames[param as keyof typeof paramNames])) {
             radarData.push({
               parameter: paramNames[param as keyof typeof paramNames] || param,
-              value: (100 - index * 15) + Math.random() * 20, // 基于主成分重要性生成值
+              value: (100 - index * 15) + Math.random() * 20, 
               fullMark: 100
             });
           }
@@ -133,7 +133,7 @@ const DataAnalysis: React.FC = () => {
       return radarData;
     }
 
-    // 后备模拟数据
+    
     return result.parameters.map(param => ({
       parameter: paramNames[param as keyof typeof paramNames] || param,
       value: Math.random() * 100,
@@ -180,12 +180,12 @@ const DataAnalysis: React.FC = () => {
         const pcaData = generatePCAData(result);
         const radarData = generateRadarData(result);
         
-        // 使用真实数据生成洞察或使用默认洞察
+        
         let insights = result.insights;
         if (insights.length === 0 && result.metrics) {
           insights = [];
           
-          // 基于真实数据生成洞察
+          
           if (result.metrics.total_variance_explained) {
             insights.push(`总方差解释比例: ${(result.metrics.total_variance_explained * 100).toFixed(1)}%`);
           }
@@ -202,7 +202,7 @@ const DataAnalysis: React.FC = () => {
             insights.push(result.metrics.summary);
           }
           
-          // 如果没有生成洞察，使用默认洞察
+          
           if (insights.length === 0) {
             insights = [
               '前两个主成分解释了大部分数据方差',
@@ -223,20 +223,20 @@ const DataAnalysis: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                {/* 方差解释比例 */}
+                {}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">主成分方差解释比例</h4>
                   <ExpertiseVarianceChart data={pcaData} />
                 </div>
                 
-                {/* 参数雷达图 */}
+                {}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">参数分布雷达图</h4>
                   <RadarChartComponent data={radarData} />
                 </div>
               </div>
               
-              {/* 分析洞察 */}
+              {}
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-3">分析洞察</h4>
                 <div className="space-y-2">
@@ -270,7 +270,7 @@ const DataAnalysis: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* 因果关系结果 */}
+                {}
                 {result.metrics?.causality_results && result.metrics.causality_results.length > 0 ? (
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-3">发现的因果关系</h4>
@@ -297,7 +297,7 @@ const DataAnalysis: React.FC = () => {
                   </div>
                 )}
                 
-                {/* 分析洞察 */}
+                {}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">分析洞察</h4>
                   <div className="space-y-2">
@@ -376,7 +376,7 @@ const DataAnalysis: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* 强相关性结果 */}
+                {}
                 {result.metrics?.strong_correlations && result.metrics.strong_correlations.length > 0 ? (
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-3">强相关性关系</h4>
@@ -403,7 +403,7 @@ const DataAnalysis: React.FC = () => {
                   </div>
                 )}
                 
-                {/* 相关性矩阵 */}
+                {}
                 {result.metrics?.correlation_matrix && (
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 mb-3">相关性矩阵</h4>
@@ -442,7 +442,7 @@ const DataAnalysis: React.FC = () => {
                   </div>
                 )}
                 
-                {/* 分析洞察 */}
+                {}
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">相关性洞察</h4>
                   <div className="space-y-2">
@@ -485,7 +485,7 @@ const DataAnalysis: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
             <div className="p-2 bg-green-100 rounded-lg">
@@ -499,7 +499,7 @@ const DataAnalysis: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* 左侧：分析配置 */}
+          {}
           <div className="lg:col-span-1">
             <Card variant="elevated" className="sticky top-8">
               <CardHeader>
@@ -509,7 +509,7 @@ const DataAnalysis: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* 分析类型 */}
+                {}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     分析类型
@@ -538,7 +538,7 @@ const DataAnalysis: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 监测站点 */}
+                {}
                 <Select
                   label="监测站点"
                   options={stations}
@@ -546,7 +546,7 @@ const DataAnalysis: React.FC = () => {
                   onChange={setSelectedStation}
                 />
 
-                {/* 参数选择 */}
+                {}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     分析参数
@@ -572,7 +572,7 @@ const DataAnalysis: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 开始分析按钮 */}
+                {}
                 <Button
                   onClick={runDataAnalysis}
                   disabled={isAnalyzing || selectedParameters.length === 0}
@@ -587,7 +587,7 @@ const DataAnalysis: React.FC = () => {
             </Card>
           </div>
 
-          {/* 右侧：分析结果 */}
+          {}
           <div className="lg:col-span-3">
             {analysisResults.length === 0 ? (
               <Card variant="outlined" className="text-center py-12">

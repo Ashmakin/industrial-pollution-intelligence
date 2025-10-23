@@ -54,7 +54,7 @@ const DataCollection: React.FC = () => {
   const [availableStations, setAvailableStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 完整的中国省市列表
+  
   const areaOptions = [
     { code: '110000', name: '北京' },
     { code: '120000', name: '天津' },
@@ -168,7 +168,7 @@ const DataCollection: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+        {}
         <div className="mb-8">
           <div className="flex items-center space-x-3 mb-2">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -182,9 +182,9 @@ const DataCollection: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* 左侧：采集控制面板 */}
+          {}
           <div className="lg:col-span-2 space-y-6">
-            {/* 采集配置 */}
+            {}
             <Card variant="elevated">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -193,7 +193,7 @@ const DataCollection: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* 区域选择 */}
+                {}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
                     监测区域选择
@@ -214,7 +214,7 @@ const DataCollection: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 采集参数 */}
+                {}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -241,7 +241,7 @@ const DataCollection: React.FC = () => {
                   </div>
                 </div>
 
-                {/* 操作按钮 */}
+                {}
                 <div className="flex space-x-3">
                   {!status.is_running ? (
                     <Button
@@ -275,7 +275,7 @@ const DataCollection: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* 采集状态 */}
+            {}
             <Card variant="elevated">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -286,7 +286,7 @@ const DataCollection: React.FC = () => {
               <CardContent>
                 {status.is_running ? (
                   <div className="space-y-4">
-                    {/* 进度条 */}
+                    {}
                     <div>
                       <div className="flex justify-between text-sm text-gray-600 mb-2">
                         <span>采集进度</span>
@@ -300,7 +300,7 @@ const DataCollection: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 状态信息 */}
+                    {}
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <span className="text-gray-500">已收集记录:</span>
@@ -332,7 +332,7 @@ const DataCollection: React.FC = () => {
                   </div>
                 )}
 
-                {/* 错误日志 */}
+                {}
                 {status.errors.length > 0 && (
                   <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                     <div className="flex items-center space-x-2 mb-3">
@@ -352,9 +352,9 @@ const DataCollection: React.FC = () => {
             </Card>
           </div>
 
-          {/* 右侧：数据概览 */}
+          {}
           <div className="space-y-6">
-            {/* 关键指标 */}
+            {}
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">关键指标</h3>
               <div className="space-y-4">
@@ -382,7 +382,7 @@ const DataCollection: React.FC = () => {
               </div>
             </div>
 
-            {/* 系统信息 */}
+            {}
             <Card variant="outlined">
               <CardHeader>
                 <CardTitle className="text-base">系统信息</CardTitle>

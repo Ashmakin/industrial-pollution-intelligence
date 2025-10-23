@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 增强的机器学习预测系统
 使用PyTorch深度学习模型进行水质预测
@@ -16,30 +16,30 @@ import warnings
 import sys
 import json
 
-# 设置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 传统机器学习
+        
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# 时间序列分析
+        
 import statsmodels.api as sm
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
 
-# PyTorch深度学习
+             
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader, TensorDataset
 import torch.nn.functional as F
 
-# 设置随机种子
+        
 torch.manual_seed(42)
 np.random.seed(42)
 
@@ -64,11 +64,11 @@ class LSTMNet(nn.Module):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         
-        # LSTM层
+               
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, 
                            batch_first=True, dropout=dropout if num_layers > 1 else 0)
         
-        # 全连接层
+              
         self.fc = nn.Sequential(
             nn.Linear(hidden_size, hidden_size // 2),
             nn.ReLU(),
@@ -77,13 +77,13 @@ class LSTMNet(nn.Module):
         )
     
     def forward(self, x):
-        # LSTM前向传播
+                  
         lstm_out, (hidden, cell) = self.lstm(x)
         
-        # 取最后一个时间步的输出
+                     
         last_output = lstm_out[:, -1, :]
         
-        # 全连接层
+              
         output = self.fc(last_output)
         return output
 
@@ -95,7 +95,7 @@ class CNNLSTMNet(nn.Module):
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         
-        # 1D卷积层
+               
         self.conv1d = nn.Sequential(
             nn.Conv1d(input_size, 32, kernel_size=3, padding=1),
             nn.ReLU(),
@@ -104,11 +104,11 @@ class CNNLSTMNet(nn.Module):
             nn.AdaptiveAvgPool1d(1)
         )
         
-        # LSTM层
+               
         self.lstm = nn.LSTM(64, hidden_size, num_layers, 
                            batch_first=True, dropout=dropout if num_layers > 1 else 0)
         
-        # 全连接层
+              
         self.fc = nn.Sequential(
             nn.Linear(hidden_size, hidden_size // 2),
             nn.ReLU(),
@@ -117,23 +117,23 @@ class CNNLSTMNet(nn.Module):
         )
     
     def forward(self, x):
-        # 转置以适应Conv1d (batch_size, seq_len, features) -> (batch_size, features, seq_len)
+                                                                                        
         x = x.transpose(1, 2)
         
-        # 1D卷积
+              
         conv_out = self.conv1d(x)
-        conv_out = conv_out.squeeze(-1)  # 移除最后一个维度
+        conv_out = conv_out.squeeze(-1)            
         
-        # 为LSTM准备输入
-        lstm_input = conv_out.unsqueeze(1)  # 添加序列维度
+                   
+        lstm_input = conv_out.unsqueeze(1)          
         
-        # LSTM前向传播
+                  
         lstm_out, (hidden, cell) = self.lstm(lstm_input)
         
-        # 取最后一个时间步的输出
+                     
         last_output = lstm_out[:, -1, :]
         
-        # 全连接层
+              
         output = self.fc(last_output)
         return output
 
@@ -144,19 +144,19 @@ class TransformerNet(nn.Module):
         super(TransformerNet, self).__init__()
         self.d_model = d_model
         
-        # 输入投影
+              
         self.input_projection = nn.Linear(input_size, d_model)
         
-        # 位置编码
+              
         self.pos_encoding = nn.Parameter(torch.randn(1000, d_model))
         
-        # Transformer编码器
+                        
         encoder_layer = nn.TransformerEncoderLayer(
             d_model=d_model, nhead=nhead, dropout=dropout, batch_first=True
         )
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
         
-        # 输出层
+             
         self.output_layer = nn.Sequential(
             nn.Linear(d_model, d_model // 2),
             nn.ReLU(),
@@ -167,19 +167,19 @@ class TransformerNet(nn.Module):
     def forward(self, x):
         seq_len = x.size(1)
         
-        # 输入投影
+              
         x = self.input_projection(x)
         
-        # 添加位置编码
+                
         x = x + self.pos_encoding[:seq_len, :].unsqueeze(0)
         
-        # Transformer编码
+                       
         transformer_out = self.transformer(x)
         
-        # 取最后一个时间步的输出
+                     
         last_output = transformer_out[:, -1, :]
         
-        # 输出层
+             
         output = self.output_layer(last_output)
         return output
 
@@ -188,7 +188,7 @@ class EnhancedMLForecaster:
     
     def __init__(self, database_url: str):
         self.database_url = database_url
-        self.scalers = {}  # 为每个参数保存独立的scaler
+        self.scalers = {}                    
         self.models = {}
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         logger.info(f"Using device: {self.device}")
@@ -199,7 +199,7 @@ class EnhancedMLForecaster:
             conn = psycopg2.connect(self.database_url)
             cur = conn.cursor(cursor_factory=RealDictCursor)
             
-            # 参数映射
+                  
             param_mapping = {
                 'ph': 'ph',
                 'ammonia_nitrogen': 'ammonia_nitrogen',
@@ -216,7 +216,7 @@ class EnhancedMLForecaster:
             
             db_param = param_mapping.get(parameter, parameter)
             
-            # 时间范围
+                  
             start_date = datetime.now() - timedelta(days=days)
             
             query = f"""
@@ -240,7 +240,7 @@ class EnhancedMLForecaster:
             df = df.set_index('monitoring_time')
             df = df.sort_index()
             
-            # 重采样到4小时间隔
+                       
             df = df.resample('4H').mean()
             df = df.dropna()
             
@@ -274,42 +274,42 @@ class EnhancedMLForecaster:
                 logger.warning(f"Insufficient data for LSTM training: {len(values)} records")
                 return {"error": "Insufficient data"}
             
-            # 数据标准化
+                   
             scaler = StandardScaler()
             scaled_values = scaler.fit_transform(values)
             self.scalers[parameter] = scaler
             
-            # 创建序列
+                  
             X, y = self.create_sequences(scaled_values.flatten(), seq_length)
             
             if len(X) < 10:
                 logger.warning("Insufficient sequences for training")
                 return {"error": "Insufficient sequences"}
             
-            # 分割数据
+                  
             split_idx = int(0.8 * len(X))
             X_train, X_test = X[:split_idx], X[split_idx:]
             y_train, y_test = y[:split_idx], y[split_idx:]
             
-            # 转换为PyTorch张量
+                          
             X_train = torch.FloatTensor(X_train).unsqueeze(-1)
             X_test = torch.FloatTensor(X_test).unsqueeze(-1)
             y_train = torch.FloatTensor(y_train)
             y_test = torch.FloatTensor(y_test)
             
-            # 创建数据加载器
+                     
             train_dataset = TensorDataset(X_train, y_train)
             train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
             
-            # 创建模型
+                  
             model = LSTMNet(input_size=1, hidden_size=64, num_layers=2, output_size=1)
             model = model.to(self.device)
             
-            # 优化器和损失函数
+                      
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             criterion = nn.MSELoss()
             
-            # 训练模型
+                  
             model.train()
             train_losses = []
             
@@ -331,7 +331,7 @@ class EnhancedMLForecaster:
                 if epoch % 20 == 0:
                     logger.info(f"Epoch {epoch}, Loss: {epoch_loss / len(train_loader):.6f}")
             
-            # 评估模型
+                  
             model.eval()
             with torch.no_grad():
                 X_test = X_test.to(self.device)
@@ -342,7 +342,7 @@ class EnhancedMLForecaster:
                 mae = mean_absolute_error(y_test_np, y_pred)
                 r2 = r2_score(y_test_np, y_pred)
             
-            # 保存模型
+                  
             self.models[f'lstm_{parameter}'] = {
                 'model': model,
                 'scaler': scaler,
@@ -354,7 +354,7 @@ class EnhancedMLForecaster:
                 "mse": float(mse),
                 "mae": float(mae),
                 "r2": float(r2),
-                "training_losses": train_losses[-10:],  # 最后10个epoch的损失
+                "training_losses": train_losses[-10:],                 
                 "data_points": len(values),
                 "sequences": len(X)
             }
@@ -371,39 +371,39 @@ class EnhancedMLForecaster:
             if len(values) < seq_length + 10:
                 return {"error": "Insufficient data"}
             
-            # 数据标准化
+                   
             scaled_values = self.scaler.fit_transform(values)
             
-            # 创建序列
+                  
             X, y = self.create_sequences(scaled_values.flatten(), seq_length)
             
             if len(X) < 10:
                 return {"error": "Insufficient sequences"}
             
-            # 分割数据
+                  
             split_idx = int(0.8 * len(X))
             X_train, X_test = X[:split_idx], X[split_idx:]
             y_train, y_test = y[:split_idx], y[split_idx:]
             
-            # 转换为PyTorch张量
+                          
             X_train = torch.FloatTensor(X_train).unsqueeze(-1)
             X_test = torch.FloatTensor(X_test).unsqueeze(-1)
             y_train = torch.FloatTensor(y_train)
             y_test = torch.FloatTensor(y_test)
             
-            # 创建数据加载器
+                     
             train_dataset = TensorDataset(X_train, y_train)
             train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
             
-            # 创建模型
+                  
             model = CNNLSTMNet(input_size=1, hidden_size=64, num_layers=2, output_size=1)
             model = model.to(self.device)
             
-            # 优化器和损失函数
+                      
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             criterion = nn.MSELoss()
             
-            # 训练模型
+                  
             model.train()
             train_losses = []
             
@@ -422,7 +422,7 @@ class EnhancedMLForecaster:
                 
                 train_losses.append(epoch_loss / len(train_loader))
             
-            # 评估模型
+                  
             model.eval()
             with torch.no_grad():
                 X_test = X_test.to(self.device)
@@ -433,7 +433,7 @@ class EnhancedMLForecaster:
                 mae = mean_absolute_error(y_test_np, y_pred)
                 r2 = r2_score(y_test_np, y_pred)
             
-            # 保存模型
+                  
             self.models[f'cnn_lstm_{parameter}'] = {
                 'model': model,
                 'scaler': self.scaler,
@@ -462,39 +462,39 @@ class EnhancedMLForecaster:
             if len(values) < seq_length + 10:
                 return {"error": "Insufficient data"}
             
-            # 数据标准化
+                   
             scaled_values = self.scaler.fit_transform(values)
             
-            # 创建序列
+                  
             X, y = self.create_sequences(scaled_values.flatten(), seq_length)
             
             if len(X) < 10:
                 return {"error": "Insufficient sequences"}
             
-            # 分割数据
+                  
             split_idx = int(0.8 * len(X))
             X_train, X_test = X[:split_idx], X[split_idx:]
             y_train, y_test = y[:split_idx], y[split_idx:]
             
-            # 转换为PyTorch张量
+                          
             X_train = torch.FloatTensor(X_train).unsqueeze(-1)
             X_test = torch.FloatTensor(X_test).unsqueeze(-1)
             y_train = torch.FloatTensor(y_train)
             y_test = torch.FloatTensor(y_test)
             
-            # 创建数据加载器
+                     
             train_dataset = TensorDataset(X_train, y_train)
             train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
             
-            # 创建模型
+                  
             model = TransformerNet(input_size=1, d_model=64, nhead=8, num_layers=3, output_size=1)
             model = model.to(self.device)
             
-            # 优化器和损失函数
+                      
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             criterion = nn.MSELoss()
             
-            # 训练模型
+                  
             model.train()
             train_losses = []
             
@@ -513,7 +513,7 @@ class EnhancedMLForecaster:
                 
                 train_losses.append(epoch_loss / len(train_loader))
             
-            # 评估模型
+                  
             model.eval()
             with torch.no_grad():
                 X_test = X_test.to(self.device)
@@ -524,7 +524,7 @@ class EnhancedMLForecaster:
                 mae = mean_absolute_error(y_test_np, y_pred)
                 r2 = r2_score(y_test_np, y_pred)
             
-            # 保存模型
+                  
             self.models[f'transformer_{parameter}'] = {
                 'model': model,
                 'scaler': self.scaler,
@@ -548,12 +548,12 @@ class EnhancedMLForecaster:
     def predict_future(self, station: str, parameter: str, horizon: int = 24, model_type: str = "lstm") -> Dict[str, Any]:
         """预测未来值"""
         try:
-            # 加载数据
+                  
             data = self.load_data(station, parameter, days=60)
             if data.empty:
                 return {"error": "No data available"}
             
-            # 获取模型
+                  
             model_key = f"{model_type}_{parameter}"
             if model_key not in self.models:
                 return {"error": f"Model {model_type} not trained for {parameter}"}
@@ -563,16 +563,16 @@ class EnhancedMLForecaster:
             scaler = model_info['scaler']
             seq_length = model_info['seq_length']
             
-            # 准备数据
+                  
             values = data['value'].values.reshape(-1, 1)
             scaled_values = scaler.transform(values)
             
-            # 获取最后的序列
+                     
             last_sequence = scaled_values[-seq_length:].flatten()
             last_sequence = torch.FloatTensor(last_sequence).unsqueeze(0).unsqueeze(-1)
             last_sequence = last_sequence.to(self.device)
             
-            # 预测
+                
             model.eval()
             predictions = []
             
@@ -583,16 +583,16 @@ class EnhancedMLForecaster:
                     pred = model(current_sequence)
                     predictions.append(pred.cpu().numpy()[0, 0])
                     
-                    # 更新序列（滑动窗口）
+                                
                     pred_reshaped = pred.unsqueeze(1).unsqueeze(-1)
                     new_seq = torch.cat([current_sequence[:, 1:, :], pred_reshaped], dim=1)
                     current_sequence = new_seq
             
-            # 反标准化
+                  
             predictions = np.array(predictions).reshape(-1, 1)
             predictions = scaler.inverse_transform(predictions).flatten()
             
-            # 生成时间戳
+                   
             last_time = data.index[-1]
             future_times = [last_time + timedelta(hours=4*i) for i in range(1, horizon+1)]
             
@@ -612,12 +612,12 @@ class EnhancedMLForecaster:
     def ensemble_forecast(self, station: str, parameter: str, horizon: int = 24) -> Dict[str, Any]:
         """集成预测"""
         try:
-            # 训练多个模型
+                    
             lstm_result = self.train_lstm_model(self.load_data(station, parameter), parameter)
             cnn_lstm_result = self.train_cnn_lstm_model(self.load_data(station, parameter), parameter)
             transformer_result = self.train_transformer_model(self.load_data(station, parameter), parameter)
             
-            # 获取预测
+                  
             lstm_pred = self.predict_future(station, parameter, horizon, "lstm")
             cnn_lstm_pred = self.predict_future(station, parameter, horizon, "cnn_lstm")
             transformer_pred = self.predict_future(station, parameter, horizon, "transformer")
@@ -625,7 +625,7 @@ class EnhancedMLForecaster:
             if "error" in lstm_pred or "error" in cnn_lstm_pred or "error" in transformer_pred:
                 return {"error": "Failed to get predictions from all models"}
             
-            # 集成预测（简单平均）
+                        
             ensemble_predictions = []
             for i in range(horizon):
                 pred = (
@@ -667,17 +667,17 @@ def main():
     
     args = parser.parse_args()
     
-    # 数据库连接
+           
     db_url = "postgres://pollution_user:pollution_pass@localhost:5432/pollution_db"
     
-    # 创建预测器
+           
     forecaster = EnhancedMLForecaster(db_url)
     
     if args.model_type == 'ensemble':
-        # 集成预测
+              
         result = forecaster.ensemble_forecast(args.station, args.parameter, args.horizon)
     else:
-        # 单模型预测
+               
         data = forecaster.load_data(args.station, args.parameter, args.days)
         if data.empty:
             result = {"error": "No data available"}

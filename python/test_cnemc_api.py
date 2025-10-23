@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 测试CNEMC API响应
 """
@@ -10,9 +10,9 @@ def test_cnemc_api():
     """测试CNEMC API"""
     base_url = "https://szzdjc.cnemc.cn:8070/GJZ/Ajax/Publish.ashx"
     
-    # 测试参数
+          
     params = {
-        'AreaID': '110000',  # 北京
+        'AreaID': '110000',      
         'RiverID': '',
         'MNName': '',
         'PageIndex': -1,
@@ -26,7 +26,7 @@ def test_cnemc_api():
         print(f"Status code: {response.status_code}")
         print(f"Response headers: {dict(response.headers)}")
         
-        # 尝试解析JSON
+                  
         try:
             data = response.json()
             print(f"JSON response type: {type(data)}")

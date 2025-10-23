@@ -39,10 +39,10 @@ pub async fn get_analysis_results(
     Query(params): Query<AnalysisQuery>,
     axum::extract::Path(analysis_type): axum::extract::Path<String>,
 ) -> Result<Json<ApiResponse<serde_json::Value>>, StatusCode> {
-    // 调用真实的Python ML脚本进行数据分析
+    
     println!("Analysis type from path: {}", analysis_type);
     
-    // 构建Python脚本命令
+    
     let mut command_parts = vec![
         "cd ../python && source venv/bin/activate && python3 run_analysis.py".to_string(),
         format!("--analysis-type {}", analysis_type),
@@ -75,7 +75,7 @@ pub async fn get_analysis_results(
                 let result_str = String::from_utf8_lossy(&output.stdout);
                 println!("Python analysis output: {}", result_str);
                 
-                // 尝试解析JSON结果
+                
                 match serde_json::from_str::<serde_json::Value>(&result_str) {
                     Ok(analysis_result) => {
                         Ok(Json(ApiResponse {
@@ -118,10 +118,10 @@ pub async fn get_analysis_results(
 pub async fn get_statistics_summary(
     State(pool): State<PgPool>,
 ) -> Result<Json<ApiResponse<HashMap<String, serde_json::Value>>>, StatusCode> {
-    // Get basic statistics
+    
     let mut stats = HashMap::new();
 
-    // Count total measurements
+    
     let measurement_count = sqlx::query_scalar::<_, i64>("SELECT COUNT(*) FROM water_quality_data")
         .fetch_one(&pool)
         .await
@@ -129,7 +129,7 @@ pub async fn get_statistics_summary(
 
     stats.insert("total_measurements".to_string(), serde_json::Value::Number(measurement_count.into()));
 
-    // Count stations
+    
     let station_count = sqlx::query_scalar::<_, i64>("SELECT COUNT(DISTINCT station_name) FROM water_quality_data")
         .fetch_one(&pool)
         .await

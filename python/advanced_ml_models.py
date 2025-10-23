@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 高级机器学习预测系统
 - SARIMAX模型
@@ -20,24 +20,24 @@ import warnings
 import sys
 warnings.filterwarnings('ignore')
 
-# 重定向警告到stderr，确保stdout只有JSON输出
+                               
 import logging
 logging.getLogger().setLevel(logging.ERROR)
 
-# 传统机器学习
+        
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.preprocessing import StandardScaler, RobustScaler
 from sklearn.model_selection import train_test_split, TimeSeriesSplit
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
-# 时间序列分析
+        
 import statsmodels.api as sm
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller, acf, pacf
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
-# 深度学习框架
+        
 try:
     import torch
     import torch.nn as nn
@@ -59,7 +59,7 @@ except ImportError:
     TENSORFLOW_AVAILABLE = False
     print("TensorFlow not available")
 
-# 配置日志
+      
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -98,18 +98,18 @@ class AdvancedLSTM(nn.Module):
         )
     
     def forward(self, x):
-        # LSTM层
+               
         lstm_out, _ = self.lstm(x)
         
-        # 注意力机制
+               
         attn_out, _ = self.attention(lstm_out.transpose(0, 1), 
                                    lstm_out.transpose(0, 1), 
                                    lstm_out.transpose(0, 1))
         
-        # 取最后一个时间步的输出
+                     
         output = attn_out[-1]
         
-        # 全连接层
+              
         output = self.fc(output)
         return output
 
@@ -135,9 +135,9 @@ class TransformerModel(nn.Module):
         seq_len = x.size(1)
         x = self.input_projection(x)
         x = x + self.pos_encoding[:seq_len].unsqueeze(0)
-        x = x.transpose(0, 1)  # (seq_len, batch, d_model)
+        x = x.transpose(0, 1)                             
         x = self.transformer(x)
-        x = x[-1]  # 取最后一个时间步
+        x = x[-1]            
         x = self.output_projection(x)
         return x
 
@@ -162,7 +162,7 @@ class AdvancedMLPredictor:
         """加载时间序列数据"""
         try:
             conn = psycopg2.connect(self.db_url)
-            # 构建动态查询
+                    
             query = f"""
                 SELECT monitoring_time, {parameter} as value
                 FROM water_quality_data 
@@ -182,7 +182,7 @@ class AdvancedMLPredictor:
             
             df['monitoring_time'] = pd.to_datetime(df['monitoring_time'])
             df = df.set_index('monitoring_time')
-            df = df.resample('H').mean().interpolate()  # 小时级插值
+            df = df.resample('H').mean().interpolate()         
             
             return df
             
@@ -194,35 +194,35 @@ class AdvancedMLPredictor:
         """创建时间序列特征"""
         df_features = df.copy()
         
-        # 时间特征
+              
         df_features['hour'] = df_features.index.hour
         df_features['day_of_week'] = df_features.index.dayofweek
         df_features['day_of_year'] = df_features.index.dayofyear
         df_features['month'] = df_features.index.month
         df_features['quarter'] = df_features.index.quarter
         
-        # 周期性特征
+               
         df_features['hour_sin'] = np.sin(2 * np.pi * df_features['hour'] / 24)
         df_features['hour_cos'] = np.cos(2 * np.pi * df_features['hour'] / 24)
         df_features['day_sin'] = np.sin(2 * np.pi * df_features['day_of_year'] / 365)
         df_features['day_cos'] = np.cos(2 * np.pi * df_features['day_of_year'] / 365)
         
-        # 滞后特征
+              
         for lag in [1, 2, 3, 6, 12, 24]:
             df_features[f'value_lag_{lag}'] = df_features['value'].shift(lag)
         
-        # 滚动统计特征
+                
         for window in [6, 12, 24]:
             df_features[f'value_mean_{window}'] = df_features['value'].rolling(window).mean()
             df_features[f'value_std_{window}'] = df_features['value'].rolling(window).std()
             df_features[f'value_min_{window}'] = df_features['value'].rolling(window).min()
             df_features[f'value_max_{window}'] = df_features['value'].rolling(window).max()
         
-        # 差分特征
+              
         df_features['value_diff_1'] = df_features['value'].diff(1)
         df_features['value_diff_24'] = df_features['value'].diff(24)
         
-        # 趋势特征
+              
         df_features['trend'] = np.arange(len(df_features))
         
         return df_features.dropna()
@@ -230,17 +230,17 @@ class AdvancedMLPredictor:
     def sarimax_forecast(self, df: pd.DataFrame, parameter: str, forecast_hours: int = 24) -> Dict:
         """SARIMAX模型预测"""
         try:
-            # 数据预处理
+                   
             ts_data = df['value'].dropna()
             
-            # 季节性分解
+                   
             decomposition = seasonal_decompose(ts_data, model='additive', period=24)
             
-            # 自动选择SARIMAX参数
+                           
             best_aic = float('inf')
             best_params = None
             
-            # 网格搜索最佳参数
+                      
             p_values = range(0, 3)
             d_values = range(0, 2)
             q_values = range(0, 3)
@@ -269,9 +269,9 @@ class AdvancedMLPredictor:
                                         continue
             
             if best_params is None:
-                best_params = (1, 1, 1, 1, 1, 1)  # 默认参数
+                best_params = (1, 1, 1, 1, 1, 1)        
             
-            # 训练最终模型
+                    
             final_model = SARIMAX(ts_data,
                                  order=best_params[:3],
                                  seasonal_order=(*best_params[3:], 24),
@@ -279,12 +279,12 @@ class AdvancedMLPredictor:
                                  enforce_invertibility=False)
             fitted_model = final_model.fit(disp=False)
             
-            # 预测
+                
             forecast = fitted_model.get_forecast(steps=forecast_hours)
             forecast_mean = forecast.predicted_mean
             forecast_ci = forecast.conf_int()
             
-            # 生成预测结果
+                    
             predictions = []
             current_time = datetime.now()
             
@@ -294,7 +294,7 @@ class AdvancedMLPredictor:
                 lower_bound = forecast_ci.iloc[i, 0]
                 upper_bound = forecast_ci.iloc[i, 1]
                 
-                # 确保预测值在合理范围内
+                             
                 if parameter in self.parameter_ranges:
                     min_val, max_val = self.parameter_ranges[parameter]
                     pred_value = np.clip(pred_value, min_val, max_val)
@@ -308,15 +308,15 @@ class AdvancedMLPredictor:
                     'confidence_upper': float(upper_bound)
                 })
             
-            # 转换为与Rust后端兼容的格式
+                             
             return {
-                'station_name': 'Unknown Station',  # 将在调用时设置
+                'station_name': 'Unknown Station',           
                 'parameter': parameter,
                 'predictions': predictions,
                 'model_metrics': {
                     'rmse': float(np.sqrt(fitted_model.mse_resid)) if hasattr(fitted_model, 'mse_resid') else 0.0,
-                    'mae': 0.0,  # SARIMAX不直接提供MAE
-                    'mape': 0.0   # SARIMAX不直接提供MAPE
+                    'mae': 0.0,                   
+                    'mape': 0.0                     
                 },
                 'data_points_used': len(ts_data),
                 'forecast_model': 'SARIMAX',
@@ -333,21 +333,21 @@ class AdvancedMLPredictor:
             return {'error': 'PyTorch not available'}
         
         try:
-            # 准备数据
+                  
             df_features = self.create_features(df)
             
-            # 选择特征
+                  
             feature_columns = [col for col in df_features.columns if col != 'value']
             X = df_features[feature_columns].values
             y = df_features['value'].values
             
-            # 标准化
+                 
             scaler_X = StandardScaler()
             scaler_y = StandardScaler()
             X_scaled = scaler_X.fit_transform(X)
             y_scaled = scaler_y.fit_transform(y.reshape(-1, 1)).flatten()
             
-            # 创建序列数据
+                    
             sequence_length = 24
             X_seq, y_seq = [], []
             
@@ -358,24 +358,24 @@ class AdvancedMLPredictor:
             X_seq = np.array(X_seq)
             y_seq = np.array(y_seq)
             
-            # 分割数据
+                  
             split_idx = int(len(X_seq) * 0.8)
             X_train, X_test = X_seq[:split_idx], X_seq[split_idx:]
             y_train, y_test = y_seq[:split_idx], y_seq[split_idx:]
             
-            # 创建数据集
+                   
             train_dataset = TimeSeriesDataset(X_train, y_train)
             test_dataset = TimeSeriesDataset(X_test, y_test)
             
             train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
             test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
             
-            # 创建模型
+                  
             model = AdvancedLSTM(input_size=X_seq.shape[2])
             criterion = nn.MSELoss()
             optimizer = optim.Adam(model.parameters(), lr=0.001)
             
-            # 训练模型
+                  
             model.train()
             for epoch in range(50):
                 total_loss = 0
@@ -390,17 +390,17 @@ class AdvancedMLPredictor:
                 if epoch % 10 == 0:
                     logger.info(f'Epoch {epoch}, Loss: {total_loss/len(train_loader):.4f}')
             
-            # 预测
+                
             model.eval()
             predictions = []
-            current_sequence = X_seq[-1:]  # 使用最后一个序列
+            current_sequence = X_seq[-1:]            
             
             with torch.no_grad():
                 for i in range(forecast_hours):
                     pred = model(torch.FloatTensor(current_sequence))
                     pred_value = scaler_y.inverse_transform(pred.numpy())[0, 0]
                     
-                    # 确保预测值在合理范围内
+                                 
                     if parameter in self.parameter_ranges:
                         min_val, max_val = self.parameter_ranges[parameter]
                         pred_value = np.clip(pred_value, min_val, max_val)
@@ -413,7 +413,7 @@ class AdvancedMLPredictor:
                         'confidence_upper': float(pred_value * 1.1)
                     })
                     
-                    # 更新序列（简化处理）
+                                
                     new_point = np.zeros((1, sequence_length, X_seq.shape[2]))
                     new_point[0, :-1] = current_sequence[0, 1:]
                     new_point[0, -1] = X_scaled[-1]
@@ -434,21 +434,21 @@ class AdvancedMLPredictor:
             return {'error': 'TensorFlow not available'}
         
         try:
-            # 准备数据
+                  
             df_features = self.create_features(df)
             
-            # 选择特征
+                  
             feature_columns = [col for col in df_features.columns if col != 'value']
             X = df_features[feature_columns].values
             y = df_features['value'].values
             
-            # 标准化
+                 
             scaler_X = StandardScaler()
             scaler_y = StandardScaler()
             X_scaled = scaler_X.fit_transform(X)
             y_scaled = scaler_y.fit_transform(y.reshape(-1, 1))
             
-            # 创建序列数据
+                    
             sequence_length = 24
             X_seq, y_seq = [], []
             
@@ -459,12 +459,12 @@ class AdvancedMLPredictor:
             X_seq = np.array(X_seq)
             y_seq = np.array(y_seq)
             
-            # 分割数据
+                  
             split_idx = int(len(X_seq) * 0.8)
             X_train, X_test = X_seq[:split_idx], X_seq[split_idx:]
             y_train, y_test = y_seq[:split_idx], y_seq[split_idx:]
             
-            # 创建模型
+                  
             model = Sequential([
                 Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=(sequence_length, X_seq.shape[2])),
                 MaxPooling1D(pool_size=2),
@@ -478,13 +478,13 @@ class AdvancedMLPredictor:
             
             model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
             
-            # 回调函数
+                  
             callbacks = [
                 EarlyStopping(patience=10, restore_best_weights=True),
                 ReduceLROnPlateau(factor=0.5, patience=5)
             ]
             
-            # 训练模型
+                  
             history = model.fit(
                 X_train, y_train,
                 epochs=100,
@@ -494,15 +494,15 @@ class AdvancedMLPredictor:
                 verbose=0
             )
             
-            # 预测
+                
             predictions = []
-            current_sequence = X_seq[-1:]  # 使用最后一个序列
+            current_sequence = X_seq[-1:]            
             
             for i in range(forecast_hours):
                 pred = model.predict(current_sequence, verbose=0)
                 pred_value = scaler_y.inverse_transform(pred)[0, 0]
                 
-                # 确保预测值在合理范围内
+                             
                 if parameter in self.parameter_ranges:
                     min_val, max_val = self.parameter_ranges[parameter]
                     pred_value = np.clip(pred_value, min_val, max_val)
@@ -515,7 +515,7 @@ class AdvancedMLPredictor:
                     'confidence_upper': float(pred_value * 1.1)
                 })
                 
-                # 更新序列
+                      
                 new_point = np.zeros((1, sequence_length, X_seq.shape[2]))
                 new_point[0, :-1] = current_sequence[0, 1:]
                 new_point[0, -1] = X_scaled[-1]
@@ -533,12 +533,12 @@ class AdvancedMLPredictor:
     def ensemble_forecast(self, df: pd.DataFrame, parameter: str, forecast_hours: int = 24) -> Dict:
         """集成预测"""
         try:
-            # 获取不同模型的预测
+                       
             sarimax_result = self.sarimax_forecast(df, parameter, forecast_hours)
             pytorch_result = self.pytorch_forecast(df, parameter, forecast_hours)
             tensorflow_result = self.tensorflow_forecast(df, parameter, forecast_hours)
             
-            # 收集有效预测
+                    
             valid_predictions = []
             if 'predictions' in sarimax_result:
                 valid_predictions.append(sarimax_result['predictions'])
@@ -550,7 +550,7 @@ class AdvancedMLPredictor:
             if not valid_predictions:
                 return {'error': 'No valid predictions available'}
             
-            # 集成预测结果
+                    
             ensemble_predictions = []
             for i in range(forecast_hours):
                 pred_values = []
@@ -588,12 +588,12 @@ class AdvancedMLPredictor:
     def predict(self, station_name: str, parameter: str, model_type: str = 'ensemble', forecast_hours: int = 24) -> Dict:
         """主预测函数"""
         try:
-            # 加载数据
+                  
             df = self.load_data(station_name, parameter)
             if df.empty:
                 return {'error': 'No data available'}
             
-            # 选择模型
+                  
             result = None
             if model_type == 'sarimax':
                 result = self.sarimax_forecast(df, parameter, forecast_hours)
@@ -601,10 +601,10 @@ class AdvancedMLPredictor:
                 result = self.pytorch_forecast(df, parameter, forecast_hours)
             elif model_type == 'tensorflow':
                 result = self.tensorflow_forecast(df, parameter, forecast_hours)
-            else:  # ensemble
+            else:            
                 result = self.ensemble_forecast(df, parameter, forecast_hours)
             
-            # 设置站点名称
+                    
             if isinstance(result, dict) and 'station_name' in result:
                 result['station_name'] = station_name
                 

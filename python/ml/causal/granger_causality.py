@@ -34,28 +34,28 @@ class WaterQualityGrangerCausality:
         station_data = df[df['station_name'] == station].copy()
         station_data = station_data.sort_values('monitoring_time')
         
-        # Select variables and remove missing values
+                                                    
         data = station_data[variables].dropna()
         
-        if len(data) < 50:  # Need sufficient data
+        if len(data) < 50:                        
             return pd.DataFrame()
         
-        # Check for stationarity using ADF test
+                                               
         stationary_data = data.copy()
         
         for var in variables:
-            # Try first difference if not stationary
+                                                    
             from statsmodels.tsa.stattools import adfuller
             
-            # Test original series
+                                  
             adf_result = adfuller(data[var].dropna())
             
-            if adf_result[1] > 0.05:  # Not stationary
-                # Try first difference
+            if adf_result[1] > 0.05:                  
+                                      
                 diff_data = data[var].diff().dropna()
                 adf_diff = adfuller(diff_data)
                 
-                if adf_diff[1] <= 0.05:  # First difference is stationary
+                if adf_diff[1] <= 0.05:                                  
                     stationary_data[var] = diff_data
                     logger.info(f"Applied first difference to {var} for station {station}")
                 else:
@@ -67,7 +67,7 @@ class WaterQualityGrangerCausality:
                               station: str) -> Dict:
         """Test Granger causality between two variables for a specific station"""
         
-        # Prepare data
+                      
         variables = [cause_var, effect_var]
         data = self.prepare_stationary_data(df, variables, station)
         
@@ -75,14 +75,14 @@ class WaterQualityGrangerCausality:
             return {'error': 'Insufficient data'}
         
         try:
-            # Perform Granger causality test
+                                            
             test_result = grangercausalitytests(
-                data[[effect_var, cause_var]],  # Note: effect_var first, cause_var second
+                data[[effect_var, cause_var]],                                            
                 maxlag=self.max_lags,
                 verbose=False
             )
             
-            # Extract p-values and test statistics
+                                                  
             results = {
                 'station': station,
                 'cause_var': cause_var,
@@ -91,11 +91,11 @@ class WaterQualityGrangerCausality:
                 'summary': {}
             }
             
-            # Process results for each lag
+                                          
             for lag in range(1, min(self.max_lags + 1, len(test_result))):
                 lag_result = test_result[lag]
                 
-                # Extract test statistics and p-values
+                                                      
                 ssr_ftest = lag_result[0]['ssr_ftest']
                 ssr_chi2test = lag_result[0]['ssr_chi2test']
                 lrtest = lag_result[0]['lrtest']
@@ -121,7 +121,7 @@ class WaterQualityGrangerCausality:
                     }
                 }
             
-            # Find best lag based on AIC/BIC
+                                            
             var_model = VAR(data)
             lag_order = var_model.select_order(maxlags=self.max_lags)
             
@@ -132,7 +132,7 @@ class WaterQualityGrangerCausality:
                 'fpe_lag': lag_order.fpe
             }
             
-            # Determine if causality exists
+                                           
             best_lag = lag_order.aic
             if best_lag in results['lags']:
                 best_result = results['lags'][best_lag]
@@ -200,7 +200,7 @@ class WaterQualityGrangerCausality:
         summary_df = pd.DataFrame(summary_data)
         
         if len(summary_df) > 0:
-            # Add significance levels
+                                     
             summary_df['significance'] = summary_df['p_value'].apply(
                 lambda x: '***' if x < 0.001 else '**' if x < 0.01 else '*' if x < 0.05 else ''
             )
@@ -215,7 +215,7 @@ class WaterQualityGrangerCausality:
         if len(summary_df) == 0:
             return {}
         
-        # Filter significant relationships
+                                          
         significant_df = summary_df[
             (summary_df['p_value'] < min_significance) & 
             (summary_df['granger_causality'] == True)
@@ -225,7 +225,7 @@ class WaterQualityGrangerCausality:
             logger.info("No significant Granger causality relationships found")
             return {}
         
-        # Create network data
+                             
         nodes = set()
         edges = []
         
@@ -239,11 +239,11 @@ class WaterQualityGrangerCausality:
             edges.append({
                 'source': cause,
                 'target': effect,
-                'strength': -np.log10(row['p_value']),  # Convert p-value to strength
-                'station_count': 1  # Will be aggregated
+                'strength': -np.log10(row['p_value']),                               
+                'station_count': 1                      
             })
         
-        # Aggregate edges across stations
+                                         
         edge_dict = {}
         for edge in edges:
             key = (edge['source'], edge['target'])
@@ -273,18 +273,18 @@ class WaterQualityGrangerCausality:
         if len(summary_df) == 0:
             return pd.DataFrame()
         
-        # Group by variable pairs
+                                 
         causal_strength = summary_df.groupby(['cause_variable', 'effect_variable']).agg({
             'granger_causality': ['sum', 'count'],
             'p_value': ['mean', 'min'],
             'f_statistic': ['mean', 'max']
         }).round(4)
         
-        # Flatten column names
+                              
         causal_strength.columns = ['_'.join(col).strip() for col in causal_strength.columns]
         causal_strength = causal_strength.reset_index()
         
-        # Calculate consistency metrics
+                                       
         causal_strength['consistency_ratio'] = (
             causal_strength['granger_causality_sum'] / causal_strength['granger_causality_count']
         )
@@ -292,7 +292,7 @@ class WaterQualityGrangerCausality:
             causal_strength['consistency_ratio'] * (1 - causal_strength['p_value_mean'])
         )
         
-        # Sort by strength score
+                                
         causal_strength = causal_strength.sort_values('strength_score', ascending=False)
         
         return causal_strength
@@ -309,18 +309,18 @@ class WaterQualityCausalInference:
         
         results = {}
         
-        # Granger causality analysis
+                                    
         logger.info("Running Granger causality analysis...")
         granger_results = self.granger_analyzer.analyze_all_stations(df, variable_pairs)
         results['granger_causality'] = granger_results
         
-        # Summary statistics
+                            
         results['summary'] = self.granger_analyzer.summarize_results()
         
-        # Causal strength analysis
+                                  
         results['causal_strength'] = self.granger_analyzer.analyze_causal_strength()
         
-        # Network analysis
+                          
         results['causality_network'] = self.granger_analyzer.plot_causality_network()
         
         return results
@@ -333,7 +333,7 @@ class WaterQualityCausalInference:
         if len(causal_strength) == 0:
             return []
         
-        # Filter for consistent relationships
+                                             
         consistent_relationships = causal_strength[
             causal_strength['consistency_ratio'] >= min_consistency
         ]
@@ -354,10 +354,10 @@ class WaterQualityCausalInference:
 
 def main():
     """Example usage"""
-    # Load processed data
+                         
     df = pd.read_parquet("data/processed_water_quality.parquet")
     
-    # Define variable pairs for causality testing
+                                                 
     variable_pairs = [
         ('ammonia_nitrogen', 'total_phosphorus'),
         ('total_phosphorus', 'chlorophyll_a'),
@@ -368,15 +368,15 @@ def main():
         ('conductivity', 'total_phosphorus')
     ]
     
-    # Run causal inference analysis
+                                   
     causal_analyzer = WaterQualityCausalInference()
     results = causal_analyzer.run_comprehensive_analysis(df, variable_pairs)
     
-    # Print key findings
+                        
     key_paths = causal_analyzer.identify_key_causal_paths(min_consistency=0.2)
     
     print("Key Causal Pathways:")
-    for path in key_paths[:5]:  # Top 5
+    for path in key_paths[:5]:         
         print(f"{path['cause']} -> {path['effect']}: "
               f"Consistency={path['consistency']:.2f}, "
               f"Strength={path['strength']:.3f}")

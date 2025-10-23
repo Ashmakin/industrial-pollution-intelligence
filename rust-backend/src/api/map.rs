@@ -35,7 +35,7 @@ pub async fn generate_map(
     
     println!("Generating map for parameter: {}", parameter);
     
-        // 调用Python脚本生成复杂轮廓图地图
+        
         let script_command = format!(
             "cd /Users/aphrodite/Desktop/Rustindp/python && source venv/bin/activate && python3 use_real_geojson_map.py {}",
             parameter
@@ -95,7 +95,7 @@ pub async fn generate_dashboard(
 ) -> Result<Json<DashboardResponse>, StatusCode> {
     println!("Generating dashboard data");
     
-    // 调用Python脚本生成仪表盘数据
+    
     let script_command = "cd /Users/aphrodite/Desktop/Rustindp/python && source venv/bin/activate && python3 china_map_visualization.py dashboard";
     
     println!("Executing command: {}", script_command);

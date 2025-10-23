@@ -68,7 +68,7 @@ pub struct CorrelationResult {
 pub struct PollutionTrend {
     pub station_name: String,
     pub parameter: String,
-    pub trend_direction: String, // "increasing", "decreasing", "stable"
+    pub trend_direction: String, 
     pub trend_strength: f64,
     pub p_value: f64,
     pub confidence_interval_lower: f64,
@@ -80,7 +80,7 @@ pub struct AnomalyDetection {
     pub station_name: String,
     pub parameter: String,
     pub anomaly_score: f64,
-    pub anomaly_type: String, // "statistical", "isolation_forest", "autoencoder"
+    pub anomaly_type: String, 
     pub detected_at: DateTime<Utc>,
     pub value: f64,
     pub threshold: f64,
@@ -116,8 +116,8 @@ pub struct PollutionAlert {
     pub id: Uuid,
     pub station_name: String,
     pub parameter: String,
-    pub alert_type: String, // "exceedance", "trend", "anomaly"
-    pub severity: String,   // "low", "medium", "high", "critical"
+    pub alert_type: String, 
+    pub severity: String,   
     pub message: String,
     pub threshold_value: f64,
     pub actual_value: f64,
@@ -142,7 +142,7 @@ pub struct WaterQualitySummary {
     pub total_measurements: i64,
     pub latest_measurement_time: Option<DateTime<Utc>>,
     pub grade_distribution: Vec<WaterQualityGradeDistribution>,
-    pub top_pollutants: Vec<(String, f64)>, // parameter -> average concentration
+    pub top_pollutants: Vec<(String, f64)>, 
     pub critical_stations: Vec<String>,
 }
 

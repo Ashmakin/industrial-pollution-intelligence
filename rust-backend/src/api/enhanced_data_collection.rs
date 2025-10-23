@@ -64,14 +64,14 @@ pub async fn start_collection(
 ) -> Result<Json<ApiResponse<DataCollectionStatus>>, StatusCode> {
     println!("Starting enhanced data collection with request: {:?}", request);
     
-    // 构建地区参数
+    
     let areas_param = if let Some(areas) = &request.areas {
         areas.join(",")
     } else {
-        "北京,上海,广东".to_string() // 默认地区
+        "北京,上海,广东".to_string() 
     };
     
-    // 使用增强的数据收集器
+    
     let script_command = format!(
         "cd /Users/aphrodite/Desktop/Rustindp/python && source venv/bin/activate && python3 enhanced_cnemc_collector.py collect {}",
         areas_param
@@ -93,7 +93,7 @@ pub async fn start_collection(
                 println!("Enhanced data collection completed successfully");
                 println!("Stdout: {}", stdout);
                 
-                // 解析结果获取实际插入的记录数
+                
                 let mut total_inserted = 0;
                 let mut total_skipped = 0;
                 
@@ -145,7 +145,7 @@ pub async fn start_collection(
 pub async fn get_status(
     State(pool): State<PgPool>,
 ) -> Result<Json<ApiResponse<DataCollectionStatus>>, StatusCode> {
-    // 从数据库查询真实状态
+    
     match sqlx::query_as::<_, (i64, String)>(
         "SELECT COUNT(*) as total_records, 
                 STRING_AGG(DISTINCT province, ', ') as provinces 
@@ -188,7 +188,7 @@ pub async fn get_status(
 pub async fn get_areas(
     State(_pool): State<PgPool>,
 ) -> Result<Json<ApiResponse<Vec<HashMap<String, String>>>>, StatusCode> {
-    // 返回所有可用的地区
+    
     let areas = vec![
         ("110000", "北京"),
         ("120000", "天津"),
@@ -244,7 +244,7 @@ pub async fn get_areas(
 pub async fn get_basins(
     State(_pool): State<PgPool>,
 ) -> Result<Json<ApiResponse<Vec<HashMap<String, String>>>>, StatusCode> {
-    // 返回所有可用的流域
+    
     let basins = vec![
         ("haihe", "海河流域"),
         ("yellow_river", "黄河流域"),
@@ -281,7 +281,7 @@ pub async fn get_stations(
     State(pool): State<PgPool>,
     Query(params): Query<StationQuery>,
 ) -> Result<Json<ApiResponse<Vec<HashMap<String, String>>>>, StatusCode> {
-    // 从数据库查询指定地区的监测站
+    
     match sqlx::query_as::<_, (String, String)>(
         "SELECT DISTINCT station_name, basin 
          FROM water_quality_data 

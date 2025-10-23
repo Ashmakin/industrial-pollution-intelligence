@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+                      
 """
 真实的CNEMC API数据采集脚本
 使用您提供的API接口采集真实的水质监测数据
@@ -18,10 +18,10 @@ def fetch_cnemc_data(area_id: str, max_records: int = 60):
     """从CNEMC API获取真实水质数据"""
     print(f"正在从CNEMC API获取区域 {area_id} 的数据...")
     
-    # CNEMC API端点
+                 
     url = "https://szzdjc.cnemc.cn:8070/GJZ/Ajax/Publish.ashx"
     
-    # 请求参数
+          
     payload = {
         "AreaID": area_id,
         "RiverID": "",
@@ -48,7 +48,7 @@ def fetch_cnemc_data(area_id: str, max_records: int = 60):
     }
     
     try:
-        # 发送POST请求
+                  
         response = requests.post(url, data=payload, headers=headers, timeout=30)
         
         if response.status_code == 200:
@@ -67,7 +67,7 @@ def parse_cnemc_response(data: dict, area_id: str):
     """解析CNEMC API响应数据"""
     records = []
     
-    # 区域名称映射
+            
     area_names = {
         "110000": "北京市",
         "310000": "上海市", 
@@ -79,26 +79,26 @@ def parse_cnemc_response(data: dict, area_id: str):
     area_name = area_names.get(area_id, f"区域{area_id}")
     
     try:
-        # 解析API响应结构 - 数据在tbody字段中
+                                 
         if 'tbody' in data and isinstance(data['tbody'], list):
             print(f"找到 {len(data['tbody'])} 条数据记录")
             
             for row in data['tbody']:
                 try:
-                    if len(row) >= 17:  # 确保有足够的列
-                        # 解析HTML标签获取站点名称
+                    if len(row) >= 17:           
+                                        
                         station_html = row[2] if len(row) > 2 else ""
                         station_name = extract_text_from_html(station_html)
                         
-                        # 解析监测时间
+                                
                         monitor_time_str = row[3] if len(row) > 3 else ""
                         monitor_time = parse_monitoring_time(monitor_time_str)
                         
-                        # 水质等级
+                              
                         water_quality_grade_str = row[4] if len(row) > 4 else ""
                         water_quality_grade = parse_water_quality_grade(water_quality_grade_str)
                         
-                        # 创建记录
+                              
                         record = {
                             'station_name': station_name,
                             'station_code': f'CNEMC_{hash(station_name) % 10000:04d}',
@@ -117,7 +117,7 @@ def parse_cnemc_response(data: dict, area_id: str):
                             'chlorophyll_a': parse_numeric_from_html(row[14] if len(row) > 14 else ""),
                             'algae_density': parse_numeric_from_html(row[15] if len(row) > 15 else ""),
                             'water_quality_grade': water_quality_grade,
-                            'pollution_index': None,  # 这个字段在API响应中没有
+                            'pollution_index': None,                 
                             'data_source': 'CNEMC_API'
                         }
                         records.append(record)
@@ -139,9 +139,9 @@ def parse_numeric_value(value):
         return None
     
     try:
-        # 如果是字符串，尝试提取数值
+                       
         if isinstance(value, str):
-            # 移除HTML标签和多余空格
+                           
             value = BeautifulSoup(value, 'html.parser').get_text().strip()
             if value == '' or value == '-':
                 return None
@@ -156,7 +156,7 @@ def parse_numeric_from_html(html_value):
         return None
     
     try:
-        # 使用BeautifulSoup解析HTML
+                               
         soup = BeautifulSoup(html_value, 'html.parser')
         text = soup.get_text().strip()
         
@@ -185,7 +185,7 @@ def parse_monitoring_time(time_str):
         return datetime.now().isoformat()
     
     try:
-        # 格式: "10-20 20:00"
+                           
         current_year = datetime.now().year
         full_time_str = f"{current_year}-{time_str}"
         parsed_time = datetime.strptime(full_time_str, "%Y-%m-%d %H:%M")
@@ -198,7 +198,7 @@ def parse_water_quality_grade(grade_str):
     if not grade_str:
         return None
     
-    # 水质等级映射
+            
     grade_map = {
         "Ⅰ": 1, "Ⅱ": 2, "Ⅲ": 3, "Ⅳ": 4, "Ⅴ": 5,
         "劣Ⅴ": 6
@@ -219,7 +219,7 @@ def store_data_to_db(data: list, database_url: str):
         stored_count = 0
         for record in data:
             try:
-                # 插入水质数据
+                        
                 insert_query = """
                 INSERT INTO water_quality_data (
                     station_name, station_code, province, watershed,
@@ -275,18 +275,18 @@ def main():
         try:
             print(f"\n开始采集区域 {area_id} 的数据...")
             
-            # 从CNEMC API获取数据
+                            
             api_data = fetch_cnemc_data(area_id, args.max_records)
             
             if api_data:
-                # 存储到数据库
+                        
                 stored_count = store_data_to_db(api_data, args.database_url)
                 total_collected += stored_count
                 print(f"区域 {area_id} 成功存储 {stored_count} 条数据")
             else:
                 print(f"区域 {area_id} 未获取到数据")
                 
-            # 添加延迟避免请求过于频繁
+                          
             time.sleep(2)
             
         except Exception as e:
