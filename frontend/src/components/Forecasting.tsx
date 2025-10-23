@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { TrendingUp, Brain, Zap, Activity, AlertCircle, CheckCircle } from 'lucide-react';
-import { generateForecast, ForecastResult } from '../services/api';
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, Brain, Zap, Activity, AlertCircle, CheckCircle, MapPin, Filter } from 'lucide-react';
+import { generateForecast, ForecastResult, getStations } from '../services/api';
 import { Card, CardHeader, CardTitle, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Select } from './ui/Select';
@@ -9,20 +9,29 @@ import { MetricCard } from './ui/MetricCard';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 
+interface Station {
+  name: string;
+  basin: string;
+  province: string;
+}
+
 const Forecasting: React.FC = () => {
-  const [selectedStation, setSelectedStation] = useState('Beijing Station');
+  const [selectedStation, setSelectedStation] = useState('');
   const [selectedParameter, setSelectedParameter] = useState('ph');
   const [selectedHorizon, setSelectedHorizon] = useState('168');
   const [selectedModel, setSelectedModel] = useState<'lstm' | 'prophet' | 'ensemble'>('lstm');
   const [forecastResults, setForecastResults] = useState<ForecastResult[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [availableStations, setAvailableStations] = useState<Station[]>([]);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const stations = [
-    { value: 'Beijing Station', label: '北京监测站' },
-    { value: 'Shanghai Station', label: '上海监测站' },
-    { value: 'Guangdong Station', label: '广东监测站' },
-    { value: 'Tianjin Station', label: '天津监测站' },
-    { value: 'Chongqing Station', label: '重庆监测站' },
+  // 完整的中国省市列表
+  const cities = [
+    '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江',
+    '上海', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南',
+    '湖北', '湖南', '广东', '广西', '海南', '重庆', '四川', '贵州',
+    '云南', '西藏', '陕西', '甘肃', '青海', '宁夏', '新疆'
   ];
 
   const parameters = [
@@ -62,7 +71,57 @@ const Forecasting: React.FC = () => {
     },
   ];
 
+
+  // 根据城市过滤监测站（现在availableStations已经是过滤后的数据）
+  const filteredStations = availableStations;
+
+  // 当选择城市时，加载该城市的监测站
+  useEffect(() => {
+    if (selectedCity) {
+      loadStationsForCity(selectedCity);
+    }
+  }, [selectedCity]);
+
+  const loadStationsForCity = async (city: string) => {
+    setLoading(true);
+    try {
+      // 调用真实的API获取指定城市的监测站列表
+      const response = await fetch(`/api/pollution/stations?province=${encodeURIComponent(city)}`);
+      console.log('API响应状态:', response.status);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('API响应数据:', data);
+        if (data.success && data.data && data.data.length > 0) {
+          // 将API返回的数据转换为组件需要的格式
+          const stations = data.data.map((station: any) => ({
+            name: station.station_name,
+            basin: station.watershed || '未知流域',
+            province: station.province || city
+          }));
+          console.log('加载监测站成功:', stations);
+          setAvailableStations(stations);
+        } else {
+          console.error('获取监测站数据失败:', data.error || '未知错误');
+          setAvailableStations([]);
+        }
+      } else {
+        console.error('获取监测站数据失败:', response.statusText);
+        setAvailableStations([]);
+      }
+    } catch (error) {
+      console.error('加载监测站失败:', error);
+      setAvailableStations([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const generateNewForecast = async () => {
+    if (!selectedStation) {
+      alert('请先选择监测站点');
+      return;
+    }
+    
     setIsGenerating(true);
     try {
       const result = await generateForecast({
@@ -81,6 +140,7 @@ const Forecasting: React.FC = () => {
       setIsGenerating(false);
     }
   };
+
 
   const formatChartData = (result: ForecastResult) => {
     return result.predictions.map((pred, index) => ({
@@ -279,13 +339,42 @@ const Forecasting: React.FC = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* 监测站点 */}
-                <Select
-                  label="监测站点"
-                  options={stations}
-                  value={selectedStation}
-                  onChange={setSelectedStation}
-                />
+                {/* 城市选择 */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    选择城市
+                  </label>
+                  <Select
+                    options={cities.map(c => ({ value: c, label: c }))}
+                    value={selectedCity}
+                    onChange={(value) => {
+                      setSelectedCity(value);
+                      setSelectedStation('');
+                    }}
+                    placeholder="选择城市"
+                  />
+                </div>
+
+                {/* 监测站点选择 */}
+                {selectedCity && filteredStations.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      选择监测站点
+                    </label>
+                    <Select
+                      options={filteredStations.map(s => ({ 
+                        value: s.name, 
+                        label: s.name
+                      }))}
+                      value={selectedStation}
+                      onChange={setSelectedStation}
+                      placeholder="选择监测站点"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      共 {filteredStations.length} 个监测站点
+                    </p>
+                  </div>
+                )}
 
                 {/* 预测参数 */}
                 <Select

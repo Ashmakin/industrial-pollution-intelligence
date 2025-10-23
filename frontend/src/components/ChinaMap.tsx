@@ -77,9 +77,9 @@ const ChinaMap: React.FC = () => {
     // Clear previous render
     svgEl.innerHTML = '';
 
-    // Fixed dimensions to prevent flickering
-    const width = 800;
-    const height = 600;
+    // Fixed dimensions to display complete China map
+    const width = 1000;
+    const height = 800;
 
     // Set SVG size & viewBox to be responsive
     svgEl.setAttribute('width', String(width));
@@ -108,7 +108,7 @@ const ChinaMap: React.FC = () => {
     // Create a projection; Mercator is sufficient for China outline
     const projection = d3
       .geoMercator()
-      .scale(width * 1.2) // scale relative to width
+      .scale(width * 0.8) // Adjusted scale for complete China display
       .center([104.1954, 35.8617])
       .translate([width / 2, height / 2]);
 

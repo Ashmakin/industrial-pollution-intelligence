@@ -190,10 +190,20 @@ class EnhancedCNEMCCollector:
                 except:
                     return None
             
+            # 解析站点名称，去除HTML标签
+            def clean_station_name(name_str):
+                import re
+                if '<span' in name_str:
+                    # 提取span标签内的文本
+                    match = re.search(r'>([^<]+)<', name_str)
+                    if match:
+                        return match.group(1).strip()
+                return name_str.strip()
+            
             return DataRecord(
                 province=row[0].strip(),
                 basin=row[1].strip(),
-                station_name=row[2].strip(),
+                station_name=clean_station_name(row[2]),
                 monitoring_time=monitoring_time,
                 water_quality_class=row[4].strip(),
                 temperature=parse_value(row[5]),

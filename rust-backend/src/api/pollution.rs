@@ -102,26 +102,22 @@ pub async fn get_stations(
             station_code,
             province,
             watershed,
-            COUNT(*) as measurement_count,
-            MAX(monitoring_time) as latest_measurement_time
-        FROM water_quality_data
-        WHERE ($1::text IS NULL OR station_name ILIKE '%' || $1 || '%')
-          AND ($2::text IS NULL OR province = $2)
-          AND ($3::text IS NULL OR watershed = $3)
-        GROUP BY station_name, station_code, province, watershed
+            0::bigint as measurement_count,
+            NULL::timestamptz as latest_measurement_time
+        FROM monitoring_stations
+        WHERE province = $1 OR $1 IS NULL
         ORDER BY station_name
-        LIMIT $4 OFFSET $5
+        LIMIT 50
         "#
     )
-    .bind(&params.station_name)
     .bind(&params.province)
-    .bind(&params.watershed)
-    .bind(limit as i64)
-    .bind(offset as i64)
     .fetch_all(&pool)
     .await
     {
-        Ok(stations) => stations,
+        Ok(stations) => {
+            eprintln!("Successfully fetched {} stations", stations.len());
+            stations
+        },
         Err(e) => {
             eprintln!("Error fetching stations: {}", e);
             return Err(StatusCode::INTERNAL_SERVER_ERROR);

@@ -1,7 +1,9 @@
 use axum::{
+    extract::State,
     routing::get,
     Router,
 };
+use sqlx::Row;
 use sqlx::PgPool;
 use tower_http::cors::{CorsLayer, Any};
 use tower_http::trace::TraceLayer;
@@ -57,6 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         // Health check
         .route("/health", get(health_check))
+        .route("/test-db", get(test_db))
         
         // Pollution data endpoints
         .route("/api/pollution/stations", get(pollution::get_stations))
@@ -109,4 +112,23 @@ async fn health_check() -> axum::response::Json<ApiResponse<HashMap<String, Stri
     health_data.insert("timestamp".to_string(), chrono::Utc::now().to_rfc3339());
     
     axum::response::Json(ApiResponse::success(health_data))
+}
+
+async fn test_db(State(pool): State<PgPool>) -> axum::response::Json<ApiResponse<HashMap<String, String>>> {
+    let result = sqlx::query("SELECT current_database(), current_user, version()")
+        .fetch_one(&pool)
+        .await;
+    
+    match result {
+        Ok(row) => {
+            let mut db_info = HashMap::new();
+            db_info.insert("database".to_string(), row.get::<String, _>("current_database"));
+            db_info.insert("user".to_string(), row.get::<String, _>("current_user"));
+            db_info.insert("version".to_string(), row.get::<String, _>("version"));
+            axum::response::Json(ApiResponse::success(db_info))
+        },
+        Err(e) => {
+            axum::response::Json(ApiResponse::error(format!("Database error: {}", e)))
+        }
+    }
 }
